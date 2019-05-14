@@ -1,0 +1,24 @@
+[common]
+pay.alipay.partner = '2088911311187170'
+pay.alipay.seller_email = 'liantuxn@126.com'
+pay.alipay.key = 'znk7ttpqm4v7s6uem7fh869xyu4ogyuw'
+pay.alipay.transport = 'http'
+
+;微信支付
+pay.weixinpay.appid = 'wxee0b55f812a9d709'
+pay.weixinpay.mch_id = '1312554001'
+pay.weixinpay.key = 'PaNtEnGdA518lOgNBPaNtEnGdA518lOg'
+pay.weixinpay.spbill_create_ip = '120.26.40.229'
+pay.weixinpay.notify_url = 'http://api.svip2050.com/wechat/weixinpay/notify'
+
+
+;快钱支付
+pay.kuaiqianpay.version = '1.0'
+pay.kuaiqianpay.app_id = '09d549fc7abf4491'
+pay.kuaiqianpay.merchantId = '812000045110003'
+pay.kuaiqianpay.terminalId = '20150924'
+pay.kuaiqianpay.public_key = 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAp1mxpwPjVJdhey3h19FHWY4gMpG89v0bX1INPxOBNgvkJTTH7bYrG7ReEFZD3WI61dpgXbgc6hSe5kgLUMvW6XpYmgSe8Yh2ffBeSH6O3qTCGv8QDMEDZrygGsNdEBdXm1voA73SRm/P8feFRbzPHxIQebukBO5K9eAJIFZTonYMY1+lxrGSP4bw+GuF9aCbLQnXz4ds726C32LjBX1LtUMqqCtwJvcrtVFlGIulrkq8H5v58d7gzXk4MJJIPjAU8XHFZfXHgiHwjbkGCubHe2yRZK1g1s8MfglbpmkDX3B8W2oDt47XYa65BZ0QYK1BKrG+B0oagbVPTYN0xZ2V6QIDAQAB'
+pay.kuaiqianpay.url = 'https://101.89.87.178:443/sdk/isv/index'
+
+[product : common]
+[develop : product]

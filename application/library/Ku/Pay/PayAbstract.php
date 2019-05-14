@@ -2,7 +2,8 @@
 
 namespace Ku\Pay;
 
-abstract class PayAbstract {
+abstract class PayAbstract
+{
 
     /**
      * Authorizer Config [only read]
@@ -13,7 +14,7 @@ abstract class PayAbstract {
 
     /**
      * 支付方式
-     * @var string 
+     * @var string
      */
     protected $_pay_type = null;
 
@@ -42,7 +43,8 @@ abstract class PayAbstract {
      *
      * @return string
      */
-    public function getPayType() {
+    public function getPayType()
+    {
         return $this->_pay_type;
     }
 
@@ -51,7 +53,8 @@ abstract class PayAbstract {
      *
      * @return string
      */
-    public function assemble() {
+    public function assemble()
+    {
         return $this->appendURI($this->getBaseUrl(), $this->_params);
     }
 
@@ -62,7 +65,8 @@ abstract class PayAbstract {
      * @param array $append_uri
      * @return string
      */
-    public function appendURI($url, array $append_uri) {
+    public function appendURI($url, array $append_uri)
+    {
         $url = trim($url);
 
         if (!(strpos($url, 'http') === 0 || strpos($url, 'https') === 0)) {
@@ -78,8 +82,9 @@ abstract class PayAbstract {
      * @param string $base_url
      * @return \Oauth\Client\OauthAbstract
      */
-    public function setBaseUrl($base_url) {
-        $this->_baseUrl = (string) $base_url;
+    public function setBaseUrl($base_url)
+    {
+        $this->_baseUrl = (string)$base_url;
 
         return $this;
     }
@@ -89,7 +94,8 @@ abstract class PayAbstract {
      *
      * @return $base_url
      */
-    public function getBaseUrl() {
+    public function getBaseUrl()
+    {
         return $this->_baseUrl;
     }
 
@@ -100,8 +106,9 @@ abstract class PayAbstract {
      * @param string $value
      * @return \Oauth\Client\OauthAbstract
      */
-    public function addParam($key, $value) {
-        $this->_params[$key] = (string) $value;
+    public function addParam($key, $value)
+    {
+        $this->_params[$key] = (string)$value;
 
         return $this;
     }
@@ -111,14 +118,16 @@ abstract class PayAbstract {
      *
      * @return array
      */
-    public function getParams() {
+    public function getParams()
+    {
         return $this->_params;
     }
 
     /**
      * 跳转处理
      */
-    public function jumpto() {
+    public function jumpto()
+    {
         header('Location:' . $this->assemble(), true, 302);
         return false;
     }
@@ -128,8 +137,9 @@ abstract class PayAbstract {
      *
      * @return boolean
      */
-    public function implicit() {
-        return (bool) ($this->implicitParase($this->httpRequest()));
+    public function implicit()
+    {
+        return (bool)($this->implicitParase($this->httpRequest()));
     }
 
     /**
@@ -139,7 +149,8 @@ abstract class PayAbstract {
      * @param string $default
      * @return string|null
      */
-    public function getQuery($name, $default = null) {
+    public function getQuery($name, $default = null)
+    {
         return \Yaf\Dispatcher::getInstance()->getRequest()->get($name, $default);
     }
 
@@ -149,12 +160,13 @@ abstract class PayAbstract {
      * @param boolean $post
      * @return string
      */
-    public function httpRequest($post = true) {
+    public function httpRequest($post = true)
+    {
         $http = new \Ku\Http();
         $http->setTimeout(5);
         $url = $post === true ? $this->getBaseUrl() : $this->assemble();
         $http->setUrl($url);
-        $http->setParam($this->getParams(),true);
+        $http->setParam($this->getParams(), true);
 
         return $http->send();
     }
@@ -162,7 +174,8 @@ abstract class PayAbstract {
     /**
      * 重置参数组
      */
-    protected function resetParams() {
+    protected function resetParams()
+    {
         $this->_params = array();
     }
 
@@ -172,7 +185,8 @@ abstract class PayAbstract {
      * @return \Yaf\Config\Ini
      * @throws \Exception
      */
-    public function getConfig() {
+    public function getConfig()
+    {
         if (!$this->_pay_config instanceof \Yaf\Config\Ini) {
             $config = new \Yaf\Config\Ini(\APPLICATION_PATH . '/conf/pay.ini', \Yaf\Application::app()->environ());
             $this->_pay_config = $config->get('pay.' . strtolower($this->_pay_type));
@@ -192,9 +206,10 @@ abstract class PayAbstract {
      * @param $inCharset 输入的编码格式
      * return 编码后的字符串
      */
-    public function charsetEncode($input, $outCharset, $inCharset) {
+    public function charsetEncode($input, $outCharset, $inCharset)
+    {
         $output = "";
-        isset($outCharset)? : $outCharset = $inCharset;
+        isset($outCharset) ?: $outCharset = $inCharset;
         if ($inCharset == $outCharset || $input == null) {
             $output = $input;
         } elseif (function_exists("mb_convert_encoding")) {
@@ -214,9 +229,10 @@ abstract class PayAbstract {
      * @param string $inCharset 输入的解码格式
      * return 解码后的字符串
      */
-    public function charsetDecode($input, $inCharset, $outCharset) {
+    public function charsetDecode($input, $inCharset, $outCharset)
+    {
         $output = "";
-        isset($inCharset)? : $inCharset = $inCharset;
+        isset($inCharset) ?: $inCharset = $inCharset;
         if ($inCharset == $outCharset || $input == null) {
             $output = $input;
         } elseif (function_exists("mb_convert_encoding")) {
@@ -235,7 +251,8 @@ abstract class PayAbstract {
      * @param $key 私钥
      * return 签名结果
      */
-    public function md5Sign($prestr, $key) {
+    public function md5Sign($prestr, $key)
+    {
         $prestr = $prestr . $key;
         return md5($prestr);
     }
@@ -245,13 +262,14 @@ abstract class PayAbstract {
      * @param $params 签名参数组
      * return 去掉空值与签名参数后的新签名参数组
      */
-    public function paramsFilter() {
+    public function paramsFilter()
+    {
         $paramsFilter = array();
         $params = $this->getParams();
-        while (list ($key, $val) = each($params)) {
-            if ($key == "sign" || $key == "sign_type" || $val == ""){
+        foreach ($params as $key => $val) {
+            if ($key == "sign" || $key == "sign_type" || $val == "") {
                 continue;
-            }else{
+            } else {
                 $paramsFilter[$key] = $params[$key];
             }
         }
@@ -264,43 +282,47 @@ abstract class PayAbstract {
      * @param $para 排序前的数组
      * return 排序后的数组
      */
-    public function argSort($para) {
+    public function argSort($para)
+    {
         ksort($para);
-     //   reset($para);
+        //   reset($para);
         return $para;
     }
+
     /**
      * 获取sign
      * @param array $params
      * @param string $key
      * @return string
      */
-    public function createSign($params,$config){
+    public function createSign($params, $config)
+    {
         $params = $this->argSort($params);
-        $signType = strtoupper(isset($params['sign_type'])?$params['sign_type']:'MD5');
+        $signType = strtoupper(isset($params['sign_type']) ? $params['sign_type'] : 'MD5');
         $signStr = '';
         unset($params['sign']);
         unset($params['sign_type']);
         unset($params['sign_version']);
-        foreach ( $params as $k => $val ) {
+        foreach ($params as $k => $val) {
             $signStr .= "&" . $k . "=" . $val;
         }
-        $signStr = trim($signStr,'&');
-        if($signType == 'MD5'){
-            return $this->md5Sign($signStr,$config['key']);
-        }elseif($signType == 'RSA'){
-            $key = file_get_contents($config['ssl_key_dir'].'/rsa_sign_private.pem');
-            return $this->rsaSign($signStr,$key);
+        $signStr = trim($signStr, '&');
+        if ($signType == 'MD5') {
+            return $this->md5Sign($signStr, $config['key']);
+        } elseif ($signType == 'RSA') {
+            $key = file_get_contents($config['ssl_key_dir'] . '/rsa_sign_private.pem');
+            return $this->rsaSign($signStr, $key);
         }
-        
+
     }
 
-    public function rsaSign($signStr,$key){
+    public function rsaSign($signStr, $key)
+    {
         $sign = '';
-        $pkeyid = openssl_pkey_get_private ( $key );
-        openssl_sign ( $signStr, $sign, $pkeyid, OPENSSL_ALGO_SHA1 );
-        openssl_free_key ( $pkeyid );
-        $sign = base64_encode ( $sign );
+        $pkeyid = openssl_pkey_get_private($key);
+        openssl_sign($signStr, $sign, $pkeyid, OPENSSL_ALGO_SHA1);
+        openssl_free_key($pkeyid);
+        $sign = base64_encode($sign);
         return $sign;
     }
 

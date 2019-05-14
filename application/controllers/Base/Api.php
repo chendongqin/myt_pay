@@ -2,7 +2,7 @@
 
 namespace Base;
 
-class ApplicationController extends \Base\AbstractController {
+class ApiController extends \Base\AbstractController {
 
     protected $_ec = array(
         'index',
@@ -12,26 +12,23 @@ class ApplicationController extends \Base\AbstractController {
         'login'=>'*',
     );
     protected function before() {
+        $this->disableView();
+        $this->disableLayout();
         if ($this->isFilter() === false) {
-            $info = \Business\Login::getInstance()->getLoginUser();
+            if (isset($_SERVER["HTTP_REFERER"])) {
+                $info = \Business\Tokenlogin::getInstance()->getLoginUser();
+            } else {
+                $info = \Business\Login::getInstance()->getLoginUser();
+            }
             if ($info === null) {
-                if ($this->getRequest()->isXmlHttpRequest() === true) {
-                    $this->returnData('登录过期，请重新登录', 504);
-                } else {
-                    if (isset($_SERVER["HTTP_REFERER"])) {
-                        $this->redirect("/login?url=" . $_SERVER["HTTP_REFERER"]);
-                    } else {
-                        $this->redirect("/login");
-                    }
-                }
+                $this->returnData('您没有登录',505);
                 exit();
             }
-            $this->assign('loginUser',$info);
         }
     }
 
     protected function isFilter(){
-        $modules = strtolower($this->getRequest()->getModulesName());
+        $modules = strtolower($this->getRequest()->getModuleName());
         $controller = strtolower($this->getRequest()->getControllerName());
         $action = strtolower(($this->getRequest()->getActionName()));
         if(in_array($modules, $this->_ec)){
@@ -42,7 +39,8 @@ class ApplicationController extends \Base\AbstractController {
         return false;
     }
     protected function after() {
-
+        $info = \Business\Login::getInstance()->getLoginUser();
+        $this->assign('loginUser',$info);
     }
 
 

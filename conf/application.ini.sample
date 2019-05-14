@@ -5,7 +5,7 @@ application.directory = APPLICATION_PATH "/application/"
 ;application.dispatcher.catchException = 1
 application.view.ext = "phtml"
 application.layout.directory = APPLICATION_PATH "/application/views/layouts"
-application.modules = "Index"
+application.modules = "Index,Api"
 
 
 ;redis配置

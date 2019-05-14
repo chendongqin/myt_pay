@@ -18,6 +18,7 @@ class Http {
     protected $_header = 0;
 
     protected $_file = '';
+    protected $_error = '';
 //    protected $_paramPost = false;
 
     /**
@@ -71,9 +72,6 @@ class Http {
             } elseif (is_string($_params)) {
                 $this->_params = \html_entity_decode($_params);
             }
-        }
-        if($isJson){
-
         }
         return $this;
     }
@@ -182,15 +180,22 @@ class Http {
         curl_setopt($ch, CURLOPT_POST, 1);
 //        var_dump($this->_params);die();
         curl_setopt($ch, CURLOPT_POSTFIELDS, $this->_params);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         $dataLen = strlen($this->_params);
-//        var_dump($dataLen);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER,true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-            'Content-Type: application/json',
-            'Content-Length: ' .$dataLen)
+                'Accept:application/json',
+                'Content-Type:application/json;charset=utf-8',
+                'Content-Length: ' .$dataLen)
         );
         $response = curl_exec($ch);
+        $error = curl_error($ch);
+        if($error){
+            $this->_error = $error;
+            return false;
+        }
         curl_close($ch);
         $this->reset();
         return $response;
