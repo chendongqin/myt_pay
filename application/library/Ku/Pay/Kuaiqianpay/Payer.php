@@ -192,6 +192,7 @@ final class Payer extends \Ku\Pay\PayAbstract {
         }
         $signStr = trim($signStr,'&');
         $signStr = strtoupper(md5($signStr));
+//        $signStr = '882D4FD37BA11DE835C6184C5259FE70';
         if($signType == 'RSA'){
             return $this->rsaSign($signStr,$key);
         }
@@ -207,7 +208,7 @@ final class Payer extends \Ku\Pay\PayAbstract {
         $pkeyid = openssl_pkey_get_private ( $privateKey );
         openssl_sign ( $signStr, $sign, $pkeyid, OPENSSL_ALGO_SHA1 );
         openssl_free_key ( $pkeyid );
-        $sign = base64_encode( $sign );
+        $sign = base64_encode($sign);
         return $sign;
     }
 
@@ -237,6 +238,5 @@ final class Payer extends \Ku\Pay\PayAbstract {
     {
         return $this->_paramsData;
     }
-
 
 }
