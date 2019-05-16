@@ -42,6 +42,10 @@ final class Consts {
     //缓存请求数，限制请求数量
     const QR_REQ_LIMIT = 'qr.req.limit.%s.%s';
 
+    const KUAIQIANPAY = [
+        'scan_code'=>101,
+    ];
+
     private function __construct() {}
     private function __sleep() {}
     private function __clone() {}

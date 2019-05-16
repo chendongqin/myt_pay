@@ -321,5 +321,11 @@ class Tool {
         }
         return false;
     }
+    
+    
+    public static function createOrderSn(){
+        $orderSn = date('ymd'). substr(time(), -5) . substr(microtime(), 2, 5) . sprintf('%02d', rand(0, 99));
+        return $orderSn;
+    }
 
 }
