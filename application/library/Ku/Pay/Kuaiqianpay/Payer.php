@@ -102,6 +102,7 @@ final class Payer extends \Ku\Pay\PayAbstract {
         $signStr = '';
         foreach ( $params as $k => $val ) {
             if(is_array($val)){
+                //必须不转义，否则不通过
                 $signStr .= "&" . $k . "=" . json_encode($val,JSON_UNESCAPED_UNICODE);
             }else{
                 $signStr .= "&" . $k . "=" . $val;
@@ -185,6 +186,7 @@ final class Payer extends \Ku\Pay\PayAbstract {
         unset($params['sign']);
         foreach ( $params as $k => $val ) {
             if(is_array($val)){
+                //必须不转义
                 $signStr .= "&" . $k . "=" . json_encode($val,JSON_UNESCAPED_UNICODE);
             }else{
                 $signStr .= "&" . $k . "=" . $val;
@@ -192,7 +194,6 @@ final class Payer extends \Ku\Pay\PayAbstract {
         }
         $signStr = trim($signStr,'&');
         $signStr = strtoupper(md5($signStr));
-//        $signStr = '882D4FD37BA11DE835C6184C5259FE70';
         if($signType == 'RSA'){
             return $this->rsaSign($signStr,$key);
         }
