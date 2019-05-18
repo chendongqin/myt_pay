@@ -12,11 +12,15 @@ final class Payer extends \Ku\Pay\PayAbstract {
     private $_charset = 'UTF-8';
     protected $_sign_type = 'RSA';
     public $_paramsData = [];
+    private $_publicKey = '';
+    private $_privateKey = '';
 
 
     
-    public function __construct() {
+    public function __construct($publicKey ,$privateKey) {
         $this->_pay_type = 'kuaiqianpay';
+        $this->_publicKey = $publicKey;
+        $this->_privateKey = $privateKey;
     }
 
 
@@ -67,12 +71,11 @@ final class Payer extends \Ku\Pay\PayAbstract {
     public function buildRequestParam() {
         $config = $this->getConfig();
         $this->addParam('version', $config['version']);
-        $this->addParam('appId', $config['app_id']);
         $this->addParam('charset',$this->_charset);
         $this->addParam('signType', $this->_sign_type);
         $params = $this->paramsFilter();
         $params['data']= $this->getParamData();
-        $sign = $this->createSign($params, $config['private_key']);
+        $sign = $this->createSign($params,$this->_privateKey);
         //签名结果与签名方式加入请求提交参数组中
         $params['sign']= $sign;
         return $params;
@@ -109,8 +112,10 @@ final class Payer extends \Ku\Pay\PayAbstract {
             }
         }
         $signStr = trim($signStr,'&');
+        //对url连接有转移符处理
+        $signStr = str_replace('\\','',$signStr);
         $signStr = strtoupper(md5($signStr));
-        $res = $this->rsaCheck($signStr, $this->getConfig()->get('public_key'),$sign);
+        $res = $this->rsaCheck($signStr,$sign,$this->_publicKey);
         return $res;
     }
 
@@ -161,8 +166,7 @@ final class Payer extends \Ku\Pay\PayAbstract {
     private function rsaEncrypt($data)
     {
         $encrypted = '';
-        $config = $this->getConfig();
-        $cert = $config['public_key'];
+        $cert = $this->_publicKey;
         $cert = "-----BEGIN PUBLIC KEY-----\n" .
             wordwrap($cert, 64, "\n", true) .
             "\n-----END PUBLIC KEY-----";
@@ -176,10 +180,10 @@ final class Payer extends \Ku\Pay\PayAbstract {
     /**
      * 重写创建sign的方法——获取sign
      * @param array $params
-     * @param string $key
-     * @return string
+     * @param $config //私钥key
+     * @return bool|string
      */
-    public function createSign($params,$key){
+    public function createSign($params, $config){
         $params = $this->argSort($params);
         $signType = $this->_sign_type;
         $signStr = '';
@@ -195,18 +199,21 @@ final class Payer extends \Ku\Pay\PayAbstract {
         $signStr = trim($signStr,'&');
         $signStr = strtoupper(md5($signStr));
         if($signType == 'RSA'){
-            return $this->rsaSign($signStr,$key);
+            return $this->rsaSign($signStr,$config);
         }
         return false;
     }
 
     //建签
-    public function rsaSign($signStr,$key){
+    public function rsaSign($signStr,$config){
         $sign = '';
         $privateKey = "-----BEGIN RSA PRIVATE KEY-----\n" .
-            wordwrap($key, 64, "\n", true) .
+            wordwrap($config, 64, "\n", true) .
             "\n-----END RSA PRIVATE KEY-----";
         $pkeyid = openssl_pkey_get_private ( $privateKey );
+        if(!$pkeyid){
+            return false;
+        }
         openssl_sign ( $signStr, $sign, $pkeyid, OPENSSL_ALGO_SHA1 );
         openssl_free_key ( $pkeyid );
         $sign = base64_encode($sign);
@@ -214,9 +221,9 @@ final class Payer extends \Ku\Pay\PayAbstract {
     }
 
     //验签
-    function rsaCheck($data, $public_key, $sign)  {
+    public function rsaCheck($data, $sign , $config)  {
         $public_key = "-----BEGIN PUBLIC KEY-----\n" .
-            wordwrap($public_key, 64, "\n", true) .
+            wordwrap($config, 64, "\n", true) .
             "\n-----END PUBLIC KEY-----";
         $res = openssl_get_publickey($public_key);
         if(!$res)
@@ -228,13 +235,22 @@ final class Payer extends \Ku\Pay\PayAbstract {
         return $result;
     }
 
-
+    /**
+     * 添加data参数的具体参数
+     * @param $key
+     * @param $value
+     * @return $this
+     */
     public function addParamData($key, $value)
     {
         $this->_paramsData[$key] = (string)$value;
         return $this;
     }
 
+    /**
+     * 获取data参数的详细信息
+     * @return array
+     */
     public function getParamData()
     {
         return $this->_paramsData;

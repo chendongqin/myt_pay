@@ -4,43 +4,30 @@ namespace Base;
 
 class ApiController extends \Base\AbstractController {
 
-    protected $_ec = array(
-        'index',
-        'api',
-    );
     protected $_ac = array(
-        'login'=>'*',
+
     );
+    protected $_diver = '';
     protected function before() {
+        $diver = $this->getParam('diver','h5','string');
+        $this->_diver = $diver;
         $this->disableView();
         $this->disableLayout();
-        if ($this->isFilter() === false) {
-            if (isset($_SERVER["HTTP_REFERER"])) {
-                $info = \Business\Tokenlogin::getInstance()->getLoginUser();
-            } else {
-                $info = \Business\Login::getInstance()->getLoginUser();
-            }
-            if ($info === null) {
-                $this->returnData('您没有登录',505);
-                exit();
-            }
-        }
     }
 
     protected function isFilter(){
         $modules = strtolower($this->getRequest()->getModuleName());
         $controller = strtolower($this->getRequest()->getControllerName());
         $action = strtolower(($this->getRequest()->getActionName()));
-        if(in_array($modules, $this->_ec)){
-            if($this->_ac[$controller] == '*' || in_array($action, array_filter(explode(',',$this->_ac[$controller])))){
+        if(isset($this->_ac[$modules])){
+            if($this->_ac[$modules][$controller] == '*' || in_array($action, array_filter(explode(',',$this->_ac[$modules][$controller])))){
                 return true;
             }
         }
         return false;
     }
     protected function after() {
-        $info = \Business\Login::getInstance()->getLoginUser();
-        $this->assign('loginUser',$info);
+
     }
 
 
@@ -89,5 +76,13 @@ class ApiController extends \Base\AbstractController {
             $data = array_merge($data, $input);
         }
         return $this->createSignature($data);
+    }
+
+    /**
+     * 获取请求设备
+     * @return string
+     */
+    public function getDiver(){
+        return $this->_diver;
     }
 }

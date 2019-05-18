@@ -3,8 +3,8 @@
 /**
  * 流水订单表
  * 
- * @Table Schema: payment
- * @Table Name: pay_trade_order
+ * @Table Schema: myt_pay
+ * @Table Name: myt_trade_order
  */
 namespace M;
 
@@ -29,6 +29,15 @@ class MytTradeOrder extends \M\ModelAbstract {
     protected $_id = null;
 
     /**
+     * 商品名称
+     * 
+     * Column Type: varchar(255)
+     * 
+     * @var string
+     */
+    protected $_goods_name = '';
+
+    /**
      * 交易流水号
      * 
      * Column Type: char(21)
@@ -38,6 +47,25 @@ class MytTradeOrder extends \M\ModelAbstract {
     protected $_out_trade_no = '';
 
     /**
+     * 内部订单号（退款时为原订单号）
+     * 
+     * Column Type: varchar(21)
+     * 
+     * @var string
+     */
+    protected $_into_trade_no = '';
+
+    /**
+     * 商户id
+     * 
+     * Column Type: int(11)
+     * Default: 0
+     * 
+     * @var int
+     */
+    protected $_merchant_id = 0;
+
+    /**
      * 支付渠道
      * 
      * Column Type: varchar(20)
@@ -45,25 +73,6 @@ class MytTradeOrder extends \M\ModelAbstract {
      * @var string
      */
     protected $_payment_type = '';
-
-    /**
-     * 用户id
-     * 
-     * Column Type: int(11)
-     * Default: 0
-     * 
-     * @var int
-     */
-    protected $_user_id = 0;
-
-    /**
-     * 用户第三方账号
-     * 
-     * Column Type: varchar(60)
-     * 
-     * @var string
-     */
-    protected $_user_account = '';
 
     /**
      * 交易类型
@@ -126,6 +135,62 @@ class MytTradeOrder extends \M\ModelAbstract {
     protected $_is_done = 0;
 
     /**
+     * 操作设备
+     * 
+     * Column Type: varchar(20)
+     * Default: local
+     * 
+     * @var string
+     */
+    protected $_diver = 'local';
+
+    /**
+     * 随机校验码
+     * 
+     * Column Type: varchar(20)
+     * 
+     * @var string
+     */
+    protected $_random_num = '';
+
+    /**
+     * 交易信息json
+     * 
+     * Column Type: varchar(800)
+     * 
+     * @var string
+     */
+    protected $_trade_info = '';
+
+    /**
+     * 错误描述
+     * 
+     * Column Type: varchar(255)
+     * 
+     * @var string
+     */
+    protected $_error = '';
+
+    /**
+     * 轮询时间
+     * 
+     * Column Type: int(5)
+     * Default: 0
+     * 
+     * @var int
+     */
+    protected $_polling = 0;
+
+    /**
+     * 备注
+     * 
+     * Column Type: varchar(255)
+     * 
+     * @var string
+     */
+    protected $_remark = '';
+
+    /**
      * Params
      * 
      * Column Type: array
@@ -145,7 +210,7 @@ class MytTradeOrder extends \M\ModelAbstract {
      * PRI
      * 
      * @param int $id
-     * @return \M\MytTradeOrder
+     * @return \M\Myttradeorder
      */
     public function setId($id) {
         $this->_id = (int)$id;
@@ -167,12 +232,37 @@ class MytTradeOrder extends \M\ModelAbstract {
     }
 
     /**
+     * 商品名称
+     * 
+     * Column Type: varchar(255)
+     * 
+     * @param string $goods_name
+     * @return \M\Myttradeorder
+     */
+    public function setGoods_name($goods_name) {
+        $this->_goods_name = (string)$goods_name;
+        $this->_params['goods_name'] = (string)$goods_name;
+        return $this;
+    }
+
+    /**
+     * 商品名称
+     * 
+     * Column Type: varchar(255)
+     * 
+     * @return string
+     */
+    public function getGoods_name() {
+        return $this->_goods_name;
+    }
+
+    /**
      * 交易流水号
      * 
      * Column Type: char(21)
      * 
      * @param string $out_trade_no
-     * @return \M\MytTradeOrder
+     * @return \M\Myttradeorder
      */
     public function setOut_trade_no($out_trade_no) {
         $this->_out_trade_no = (string)$out_trade_no;
@@ -192,12 +282,64 @@ class MytTradeOrder extends \M\ModelAbstract {
     }
 
     /**
+     * 内部订单号（退款时为原订单号）
+     * 
+     * Column Type: varchar(21)
+     * 
+     * @param string $into_trade_no
+     * @return \M\Myttradeorder
+     */
+    public function setInto_trade_no($into_trade_no) {
+        $this->_into_trade_no = (string)$into_trade_no;
+        $this->_params['into_trade_no'] = (string)$into_trade_no;
+        return $this;
+    }
+
+    /**
+     * 内部订单号（退款时为原订单号）
+     * 
+     * Column Type: varchar(21)
+     * 
+     * @return string
+     */
+    public function getInto_trade_no() {
+        return $this->_into_trade_no;
+    }
+
+    /**
+     * 商户id
+     * 
+     * Column Type: int(11)
+     * Default: 0
+     * 
+     * @param int $merchant_id
+     * @return \M\Myttradeorder
+     */
+    public function setMerchant_id($merchant_id) {
+        $this->_merchant_id = (int)$merchant_id;
+        $this->_params['merchant_id'] = (int)$merchant_id;
+        return $this;
+    }
+
+    /**
+     * 商户id
+     * 
+     * Column Type: int(11)
+     * Default: 0
+     * 
+     * @return int
+     */
+    public function getMerchant_id() {
+        return $this->_merchant_id;
+    }
+
+    /**
      * 支付渠道
      * 
      * Column Type: varchar(20)
      * 
      * @param string $payment_type
-     * @return \M\MytTradeOrder
+     * @return \M\Myttradeorder
      */
     public function setPayment_type($payment_type) {
         $this->_payment_type = (string)$payment_type;
@@ -217,65 +359,13 @@ class MytTradeOrder extends \M\ModelAbstract {
     }
 
     /**
-     * 用户id
-     * 
-     * Column Type: int(11)
-     * Default: 0
-     * 
-     * @param int $user_id
-     * @return \M\MytTradeOrder
-     */
-    public function setUser_id($user_id) {
-        $this->_user_id = (int)$user_id;
-        $this->_params['user_id'] = (int)$user_id;
-        return $this;
-    }
-
-    /**
-     * 用户id
-     * 
-     * Column Type: int(11)
-     * Default: 0
-     * 
-     * @return int
-     */
-    public function getUser_id() {
-        return $this->_user_id;
-    }
-
-    /**
-     * 用户第三方账号
-     * 
-     * Column Type: varchar(60)
-     * 
-     * @param string $user_account
-     * @return \M\MytTradeOrder
-     */
-    public function setUser_account($user_account) {
-        $this->_user_account = (string)$user_account;
-        $this->_params['user_account'] = (string)$user_account;
-        return $this;
-    }
-
-    /**
-     * 用户第三方账号
-     * 
-     * Column Type: varchar(60)
-     * 
-     * @return string
-     */
-    public function getUser_account() {
-        return $this->_user_account;
-    }
-
-    /**
      * 交易类型
      * 
      * Column Type: tinyint(3)
      * Default: 0
      * 
      * @param int $type
-     * @return \M\MytTradeOrder
+     * @return \M\Myttradeorder
      */
     public function setType($type) {
         $this->_type = (int)$type;
@@ -302,7 +392,7 @@ class MytTradeOrder extends \M\ModelAbstract {
      * Default: 0.00
      * 
      * @param float $amount
-     * @return \M\MytTradeOrder
+     * @return \M\Myttradeorder
      */
     public function setAmount($amount) {
         $this->_amount = (float)$amount;
@@ -329,7 +419,7 @@ class MytTradeOrder extends \M\ModelAbstract {
      * Default: 0
      * 
      * @param int $status
-     * @return \M\MytTradeOrder
+     * @return \M\Myttradeorder
      */
     public function setStatus($status) {
         $this->_status = (int)$status;
@@ -356,7 +446,7 @@ class MytTradeOrder extends \M\ModelAbstract {
      * Default: 0
      * 
      * @param int $create_at
-     * @return \M\MytTradeOrder
+     * @return \M\Myttradeorder
      */
     public function setCreate_at($create_at) {
         $this->_create_at = (int)$create_at;
@@ -383,7 +473,7 @@ class MytTradeOrder extends \M\ModelAbstract {
      * Default: 0
      * 
      * @param int $update_at
-     * @return \M\MytTradeOrder
+     * @return \M\Myttradeorder
      */
     public function setUpdate_at($update_at) {
         $this->_update_at = (int)$update_at;
@@ -410,7 +500,7 @@ class MytTradeOrder extends \M\ModelAbstract {
      * Default: 0
      * 
      * @param int $is_done
-     * @return \M\MytTradeOrder
+     * @return \M\Myttradeorder
      */
     public function setIs_done($is_done) {
         $this->_is_done = (int)$is_done;
@@ -431,23 +521,184 @@ class MytTradeOrder extends \M\ModelAbstract {
     }
 
     /**
+     * 操作设备
+     * 
+     * Column Type: varchar(20)
+     * Default: local
+     * 
+     * @param string $diver
+     * @return \M\Myttradeorder
+     */
+    public function setDiver($diver) {
+        $this->_diver = (string)$diver;
+        $this->_params['diver'] = (string)$diver;
+        return $this;
+    }
+
+    /**
+     * 操作设备
+     * 
+     * Column Type: varchar(20)
+     * Default: local
+     * 
+     * @return string
+     */
+    public function getDiver() {
+        return $this->_diver;
+    }
+
+    /**
+     * 随机校验码
+     * 
+     * Column Type: varchar(20)
+     * 
+     * @param string $random_num
+     * @return \M\Myttradeorder
+     */
+    public function setRandom_num($random_num) {
+        $this->_random_num = (string)$random_num;
+        $this->_params['random_num'] = (string)$random_num;
+        return $this;
+    }
+
+    /**
+     * 随机校验码
+     * 
+     * Column Type: varchar(20)
+     * 
+     * @return string
+     */
+    public function getRandom_num() {
+        return $this->_random_num;
+    }
+
+    /**
+     * 交易信息json
+     * 
+     * Column Type: varchar(800)
+     * 
+     * @param string $trade_info
+     * @return \M\Myttradeorder
+     */
+    public function setTrade_info($trade_info) {
+        $this->_trade_info = (string)$trade_info;
+        $this->_params['trade_info'] = (string)$trade_info;
+        return $this;
+    }
+
+    /**
+     * 交易信息json
+     * 
+     * Column Type: varchar(800)
+     * 
+     * @return string
+     */
+    public function getTrade_info() {
+        return $this->_trade_info;
+    }
+
+    /**
+     * 错误描述
+     * 
+     * Column Type: varchar(255)
+     * 
+     * @param string $error
+     * @return \M\Myttradeorder
+     */
+    public function setError($error) {
+        $this->_error = (string)$error;
+        $this->_params['error'] = (string)$error;
+        return $this;
+    }
+
+    /**
+     * 错误描述
+     * 
+     * Column Type: varchar(255)
+     * 
+     * @return string
+     */
+    public function getError() {
+        return $this->_error;
+    }
+
+    /**
+     * 轮询时间
+     * 
+     * Column Type: int(5)
+     * Default: 0
+     * 
+     * @param int $polling
+     * @return \M\Myttradeorder
+     */
+    public function setPolling($polling) {
+        $this->_polling = (int)$polling;
+        $this->_params['polling'] = (int)$polling;
+        return $this;
+    }
+
+    /**
+     * 轮询时间
+     * 
+     * Column Type: int(5)
+     * Default: 0
+     * 
+     * @return int
+     */
+    public function getPolling() {
+        return $this->_polling;
+    }
+
+    /**
+     * 备注
+     * 
+     * Column Type: varchar(255)
+     * 
+     * @param string $remark
+     * @return \M\Myttradeorder
+     */
+    public function setRemark($remark) {
+        $this->_remark = (string)$remark;
+        $this->_params['remark'] = (string)$remark;
+        return $this;
+    }
+
+    /**
+     * 备注
+     * 
+     * Column Type: varchar(255)
+     * 
+     * @return string
+     */
+    public function getRemark() {
+        return $this->_remark;
+    }
+
+    /**
      * Return a array of model properties
      * 
      * @return array
      */
     public function toArray() {
         return array(
-            'id'           => $this->_id,
-            'out_trade_no' => $this->_out_trade_no,
-            'payment_type' => $this->_payment_type,
-            'user_id'      => $this->_user_id,
-            'user_account' => $this->_user_account,
-            'type'         => $this->_type,
-            'amount'       => $this->_amount,
-            'status'       => $this->_status,
-            'create_at'    => $this->_create_at,
-            'update_at'    => $this->_update_at,
-            'is_done'      => $this->_is_done
+            'id'            => $this->_id,
+            'goods_name'    => $this->_goods_name,
+            'out_trade_no'  => $this->_out_trade_no,
+            'into_trade_no' => $this->_into_trade_no,
+            'merchant_id'   => $this->_merchant_id,
+            'payment_type'  => $this->_payment_type,
+            'type'          => $this->_type,
+            'amount'        => $this->_amount,
+            'status'        => $this->_status,
+            'create_at'     => $this->_create_at,
+            'update_at'     => $this->_update_at,
+            'is_done'       => $this->_is_done,
+            'diver'         => $this->_diver,
+            'random_num'    => $this->_random_num,
+            'trade_info'    => $this->_trade_info,
+            'error'         => $this->_error,
+            'polling'       => $this->_polling,
+            'remark'        => $this->_remark
         );
     }
 

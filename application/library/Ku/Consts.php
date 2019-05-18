@@ -43,7 +43,11 @@ final class Consts {
     const QR_REQ_LIMIT = 'qr.req.limit.%s.%s';
 
     const KUAIQIANPAY = [
-        'scan_code'=>101,
+        'scan_code_b2c'=>201,
+        'scan_code_c2b'=>202,
+        'refund_01'=>301,
+        'refund_02'=>302,
+        'refund_03'=>303,
     ];
 
     private function __construct() {}

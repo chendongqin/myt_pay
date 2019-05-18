@@ -4,38 +4,19 @@ namespace Base;
 
 class ApplicationController extends \Base\AbstractController {
 
-    protected $_ec = array(
-        'index',
-        'api',
-    );
     protected $_ac = array(
-        'login'=>'*',
+
     );
     protected function before() {
-        if ($this->isFilter() === false) {
-            $info = \Business\Login::getInstance()->getLoginUser();
-            if ($info === null) {
-                if ($this->getRequest()->isXmlHttpRequest() === true) {
-                    $this->returnData('登录过期，请重新登录', 504);
-                } else {
-                    if (isset($_SERVER["HTTP_REFERER"])) {
-                        $this->redirect("/login?url=" . $_SERVER["HTTP_REFERER"]);
-                    } else {
-                        $this->redirect("/login");
-                    }
-                }
-                exit();
-            }
-            $this->assign('loginUser',$info);
-        }
+
     }
 
     protected function isFilter(){
-        $modules = strtolower($this->getRequest()->getModulesName());
+        $modules = strtolower($this->getRequest()->getModuleName());
         $controller = strtolower($this->getRequest()->getControllerName());
         $action = strtolower(($this->getRequest()->getActionName()));
-        if(in_array($modules, $this->_ec)){
-            if($this->_ac[$controller] == '*' || in_array($action, array_filter(explode(',',$this->_ac[$controller])))){
+        if(isset($this->_ac[$modules])){
+            if($this->_ac[$modules][$controller] == '*' || in_array($action, array_filter(explode(',',$this->_ac[$modules][$controller])))){
                 return true;
             }
         }

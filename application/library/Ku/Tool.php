@@ -321,11 +321,19 @@ class Tool {
         }
         return false;
     }
-    
-    
+
+    /**
+     * 创建唯一订单号
+     * @return string
+     */
     public static function createOrderSn(){
         $orderSn = date('ymd'). substr(time(), -5) . substr(microtime(), 2, 5) . sprintf('%02d', rand(0, 99));
         return $orderSn;
+    }
+
+    public static function decimal($number,$save = 2){
+        $number = bcadd($number,0,$save);
+        return $number;
     }
 
 }
