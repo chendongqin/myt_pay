@@ -331,9 +331,16 @@ class Tool {
         return $orderSn;
     }
 
+    /**
+     * 保留小数计算
+     * @param $number
+     * @param int $save
+     * @return string
+     */
     public static function decimal($number,$save = 2){
         $number = bcadd($number,0,$save);
-        return $number;
+        return (float)$number;
     }
+
 
 }

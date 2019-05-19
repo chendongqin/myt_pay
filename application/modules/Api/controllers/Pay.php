@@ -139,14 +139,17 @@ class PayController extends \Base\ApiController
         if ($updateRes === false) {
             return $this->returnData('更新订单信息失败', 209);
         }
-
+        $url = $res['data']['authCode'];
         if($isShowQr){
-            $homeUrl = $this->getApiDomain('homeUrl');
-            $url = $homeUrl.'/api/pay/qrcode?url='.$res['data']['authCode'];
-        }else{
-            $url = $res['data']['authCode'];
+            $QRcode = new \Qrcode\QRcode();
+            $errorCorrectionLevel = 'H'; //容错级别
+            $matrixPointSize = 10; //生成图片大小
+            $QRcode::png($url, false, $errorCorrectionLevel, $matrixPointSize, 3);
+            return false;
         }
         return $this->returnData('成功', 200, true, ['orderId' => $orderId, 'url' => $url]);
+
+
     }
 
     /**
@@ -229,10 +232,13 @@ class PayController extends \Base\ApiController
     public function qrcodeAction()
     {
         $url = $this->getParam('url','','string');
+        $size= $this->getParam('size',10,'int');
+        $margin = $this->getParam('margin',3,'int');
+        $url = urldecode($url);
         $QRcode = new \Qrcode\QRcode();
         $errorCorrectionLevel = 'H'; //容错级别
-        $matrixPointSize = 5; //生成图片大小
-        $QRcode::png($url, false, $errorCorrectionLevel, $matrixPointSize, 1);
+        $matrixPointSize = $size; //生成图片大小
+        $QRcode::png($url, false, $errorCorrectionLevel, $matrixPointSize, $margin);
     }
 
     /**
