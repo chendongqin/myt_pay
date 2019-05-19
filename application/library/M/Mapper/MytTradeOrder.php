@@ -62,8 +62,7 @@ class MytTradeOrder extends MapperAbstract
      */
     public function getOrderType($key)
     {
-        var_dump($key);
-        if (!isset($this->_orderStatus[$key])) {
+        if (!isset($this->_orderTypes[$key])) {
             return false;
         }
         return $this->_orderTypes[$key];
