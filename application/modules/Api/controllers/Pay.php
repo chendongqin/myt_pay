@@ -91,6 +91,8 @@ class PayController extends \Base\ApiController
         $amount = $this->getParam('amount', 0, 'string');
         $goodsName = $this->getParam('goodsName', '', 'string');
         $isShowQr = $this->getParam('isShowQr', 1, 'int');
+        $size = $this->getParam('size', 10, 'int');
+        $margin = $this->getParam('margin', 3, 'int');
         if (empty($goodsName)) {
             return $this->returnData('商品名称不能为空', 201);
         }
@@ -109,7 +111,8 @@ class PayController extends \Base\ApiController
         $orderId = $payCode . \Ku\Tool::createOrderSn();
         $payBusiness = \Business\Kuaiqianpay::getInstance();
         $orderMapper = \M\Mapper\MytTradeOrder::getInstance();
-        if (!$payBusiness->verifyScanC2BTypes($payType)) {
+        $c2bScan = $payBusiness->verifyScanC2BTypes($payType);
+        if (!$c2bScan) {
             return $this->returnData('扫码类型不正确');
         }
         $type = $orderMapper->getOrderType('用户扫码');
@@ -140,11 +143,15 @@ class PayController extends \Base\ApiController
             return $this->returnData('更新订单信息失败', 209);
         }
         $url = $res['data']['authCode'];
-        if($isShowQr){
-            $QRcode = new \Qrcode\QRcode();
-            $errorCorrectionLevel = 'H'; //容错级别
-            $matrixPointSize = 10; //生成图片大小
-            $QRcode::png($url, false, $errorCorrectionLevel, $matrixPointSize, 3);
+        if ($isShowQr) {
+            $homeUrl = $this->getApiDomain('homeUrl');
+            $html = '<img src="'.$homeUrl.'/api/pay/qrcode?url='.$url.'&size='.$size.'&margin='.$margin.'">
+            <div><span style="font-size: 45px">请使用'.$c2bScan.'</span></div>';
+            echo $html;
+//            $QRcode = new \Qrcode\QRcode();
+//            $errorCorrectionLevel = 'H'; //容错级别
+//            $matrixPointSize = $size; //生成图片大小
+//            $QRcode::png($url, false, $errorCorrectionLevel, $matrixPointSize, $margin);
             return false;
         }
         return $this->returnData('成功', 200, true, ['orderId' => $orderId, 'url' => $url]);
@@ -165,8 +172,8 @@ class PayController extends \Base\ApiController
         if (!$refundType) {
             return $this->returnData('请填写退款类型', 203);
         }
-        if(empty($refundReason)){
-            return $this->returnData('退款原因，不能为空',204);
+        if (empty($refundReason)) {
+            return $this->returnData('退款原因，不能为空', 204);
         }
         $refundType = $refundType == 1 ? '01' : '03';
         $mapper = \M\Mapper\MytTradeOrder::getInstance();
@@ -182,11 +189,11 @@ class PayController extends \Base\ApiController
         $refundAmount = \Ku\Tool::decimal($refundAmount);
         $amt = bcmul($refundAmount, 100);
         $payBusiness = \Business\Kuaiqianpay::getInstance();
-        $res = $payBusiness->refund($order,$refundType,$amt,$termOperId);
-        if($res === true){
+        $res = $payBusiness->refund($order, $refundType, $amt, $termOperId);
+        if ($res === true) {
             $order->setUpdate_at(date('YmdHis'));
             $order->setStatus(4);
-            $order->setRemark('取消原因：'.$refundReason);
+            $order->setRemark('取消原因：' . $refundReason);
             $mapper->update($order);
         }
         return $this->returnData($payBusiness->getMessage());
@@ -196,7 +203,8 @@ class PayController extends \Base\ApiController
      * 订单查询
      * @return false
      */
-    public function queryAction(){
+    public function queryAction()
+    {
         $orderSn = $this->getParam('orderSn', '', 'string');
         $mapper = \M\Mapper\MytTradeOrder::getInstance();
         $order = $mapper->findByOut_trade_no($orderSn);
@@ -215,25 +223,25 @@ class PayController extends \Base\ApiController
         //交易订单类型
         $res['txnType'] = $mapper->getKqOrderType($res['txnType']);
         //金额分单位转化为元
-        $res['amt'] = bcdiv($res['amt'],100,2);
-        $res['refundAmt'] = bcdiv($res['refundAmt'],100,2);
-        if(!empty($res['equityInfo'])){
-            foreach ($res['equityInfo'] as $key=>$val){
-                $res['equityInfo'][$key] = bcdiv($val,100,2);
+        $res['amt'] = bcdiv($res['amt'], 100, 2);
+        $res['refundAmt'] = bcdiv($res['refundAmt'], 100, 2);
+        if (!empty($res['equityInfo'])) {
+            foreach ($res['equityInfo'] as $key => $val) {
+                $res['equityInfo'][$key] = bcdiv($val, 100, 2);
             }
         }
         //时间格式转化
-        $res['txnTime'] = date('Y-m-d H:i:s',strtotime($res['txnTime']));
+        $res['txnTime'] = date('Y-m-d H:i:s', strtotime($res['txnTime']));
         unset($res['merchantId']);
         unset($res['terminalId']);
-        return $this->returnData('成功',200,true,['detail'=>$res]);
+        return $this->returnData('成功', 200, true, ['detail' => $res]);
     }
 
     public function qrcodeAction()
     {
-        $url = $this->getParam('url','','string');
-        $size= $this->getParam('size',10,'int');
-        $margin = $this->getParam('margin',3,'int');
+        $url = $this->getParam('url', '', 'string');
+        $size = $this->getParam('size', 10, 'int');
+        $margin = $this->getParam('margin', 3, 'int');
         $url = urldecode($url);
         $QRcode = new \Qrcode\QRcode();
         $errorCorrectionLevel = 'H'; //容错级别
@@ -246,44 +254,47 @@ class PayController extends \Base\ApiController
      * @return false
      * @throws Exception
      */
-    public function get_merchantAction(){
-        $name = $this->getParam('name','','string');
-        $where = ['is_del'=>0];
-        if($name){
-            $where[] = "merchant_name like '".$name."%'";
+    public function get_merchantAction()
+    {
+        $name = $this->getParam('name', '', 'string');
+        $where = ['is_del' => 0];
+        if ($name) {
+            $where[] = "merchant_name like '" . $name . "%'";
         }
-        $mapper =\M\Mapper\MytMerchant::getInstance();
+        $mapper = \M\Mapper\MytMerchant::getInstance();
         $select = $mapper->select();
         $select->where($where);
-        $select->order(['id'=>'DESC']);
-        $select->columns(['id','merchant_name']);
+        $select->order(['id' => 'DESC']);
+        $select->columns(['id', 'merchant_name']);
         $page = $this->getParam('page', 1, 'int');
         $pagelimit = $this->getParam('pagelimit', 15, 'int');
         $pager = new \Ku\Page($select, $page, $pagelimit, $mapper->getAdapter());
-        return $this->returnData('成功',200,true,['page'=>$page,'pageLimit'=>$pagelimit,'lists'=>$pager->getList()]);
+        return $this->returnData('成功', 200, true, ['page' => $page, 'pageLimit' => $pagelimit, 'lists' => $pager->getList()]);
     }
 
     /**
      * 获取商户扫码类型
      * @return false
      */
-    public function csan_b2c_typesAction(){
+    public function csan_b2c_typesAction()
+    {
         $payBusiness = \Business\Kuaiqianpay::getInstance();
         $data = $payBusiness->getScanB2CTypes();
-        foreach ($data as $key=>$val){
-            $data[$key] = str_replace('(商户扫码)','',$val);
+        foreach ($data as $key => $val) {
+            $data[$key] = str_replace('(商户扫码)', '', $val);
         }
-        return $this->returnData('成功',200,true,$data);
+        return $this->returnData('成功', 200, true, $data);
     }
 
     /**
      * 获取用户扫码类型
      * @return false
      */
-    public function csan_c2b_typesAction(){
+    public function csan_c2b_typesAction()
+    {
         $payBusiness = \Business\Kuaiqianpay::getInstance();
         $data = $payBusiness->getScanC2BTypes();
-        return $this->returnData('成功',200,true,$data);
+        return $this->returnData('成功', 200, true, $data);
     }
 
 }

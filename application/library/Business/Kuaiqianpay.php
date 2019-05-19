@@ -356,7 +356,7 @@ class Kuaiqianpay extends BusinessAbstract
     public function verifyScanB2CTypes($key)
     {
         if (isset($this->_scanB2CType[$key])) {
-            return true;
+            return $this->_scanB2CType[$key];
         }
         return false;
     }
@@ -378,7 +378,7 @@ class Kuaiqianpay extends BusinessAbstract
     public function verifyScanC2BTypes($key)
     {
         if (isset($this->_scanC2BType[$key])) {
-            return true;
+            return $this->_scanC2BType[$key];
         }
         return false;
     }
@@ -401,11 +401,11 @@ class Kuaiqianpay extends BusinessAbstract
     ];
 
     private $_scanC2BType = [
-        '99BILLCSB' => '快钱钱包',
-        'BAIDUCSB'  => '百度支付',
-        'FFANCSB'   => '飞凡支付',
-        'ALIPAYCSB' => '支付宝支付',
-        'CUPCSB'    => '银联支付',
-        'WECHATCSB' => '微信支付',
+        '99BILLCSB' => '快钱钱包扫码支付',
+        'BAIDUCSB'  => '百度扫码支付',
+        'FFANCSB'   => '飞凡扫码支付',
+        'ALIPAYCSB' => '支付宝扫码支付',
+        'CUPCSB'    => '银联扫码支付',
+        'WECHATCSB' => '微信扫码支付',
     ];
 }
