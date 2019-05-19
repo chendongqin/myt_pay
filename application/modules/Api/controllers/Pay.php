@@ -189,6 +189,10 @@ class PayController extends \Base\ApiController
         return $this->returnData($payBusiness->getMessage());
     }
 
+    /**
+     * 订单查询
+     * @return false
+     */
     public function queryAction(){
         $orderSn = $this->getParam('orderSn', '', 'string');
         $mapper = \M\Mapper\MytTradeOrder::getInstance();
@@ -198,26 +202,24 @@ class PayController extends \Base\ApiController
         }
         $payBusiness = \Business\Kuaiqianpay::getInstance();
         $res = $payBusiness->query($order);
-        if ($res['responseCode'] != '00') {
-            return $this->returnData($res['responseMsg'], 202);
+        if ($res === false) {
+            return $this->returnData($payBusiness->getMessage());
         }
-//        var_dump($res);die();
-        $orderDetail = $res['data'];
         //扫码类型
-        $orderDetail['scanPayType'] = $payBusiness->getScanType($orderDetail['scanPayType']);
+        $res['scanPayType'] = $payBusiness->getScanType($res['scanPayType']);
         //订单支付状态
-        $orderDetail['txnFlag'] = $mapper->getKqOrderTradeStatus($orderDetail['txnFlag']);
+        $res['txnFlag'] = $mapper->getKqOrderTradeStatus($res['txnFlag']);
         //交易订单类型
-        $orderDetail['txnType'] = $mapper->getKqOrderType($orderDetail['txnType']);
+        $res['txnType'] = $mapper->getKqOrderType($res['txnType']);
         //金额分单位转化为元
-        $orderDetail['amt'] = bcdiv($orderDetail['amt'],100,2);
-        $orderDetail['refundAmt'] = bcdiv($orderDetail['refundAmt'],100,2);
-        $orderDetail['equityInfo']['orderPayAmt'] = bcdiv($orderDetail['equityInfo']['orderPayAmt'],100,2);
+        $res['amt'] = bcdiv($res['amt'],100,2);
+        $res['refundAmt'] = bcdiv($res['refundAmt'],100,2);
+        $res['equityInfo']['orderPayAmt'] = bcdiv($res['equityInfo']['orderPayAmt'],100,2);
         //时间格式转化
-        $orderDetail['txnTime'] = date('Y-m-d H:i:s',strtotime($orderDetail['txnTime']));
-        unset($orderDetail['merchantId']);
-        unset($orderDetail['terminalId']);
-        return $this->returnData('成功',200,true,['detail'=>$orderDetail]);
+        $res['txnTime'] = date('Y-m-d H:i:s',strtotime($res['txnTime']));
+        unset($res['merchantId']);
+        unset($res['terminalId']);
+        return $this->returnData('成功',200,true,['detail'=>$res]);
     }
 
     public function qrcodeAction()

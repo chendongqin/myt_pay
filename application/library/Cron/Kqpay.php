@@ -76,8 +76,19 @@ class Kqpay extends CronAbstract
                             $this->log($order->getOut_trade_no().':轮询超时退款失败,'.$msg['msg']);
                         }
                     }else{//超时无效
-                        $order->setStatus(3);
-                        $order->setError('超时过期');
+                        //查询确认订单是否完成
+                        $queryRes = $payBusiness->query($order);
+                        if($queryRes === false){
+                            $msg = $payBusiness->getMessage();
+                            $this->log($order->getOut_trade_no().':轮询超时查询失败,'.$msg['msg']);
+                        }
+                        //交易成功
+                        if($queryRes['txnFlag'] == 'S'){
+                            $order->setStatus(2);
+                        }else{
+                            $order->setStatus(3);
+                            $order->setError('超时过期');
+                        }
                         $order->setIs_done(2);
                     }
                 } else {

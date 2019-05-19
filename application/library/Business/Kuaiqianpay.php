@@ -312,7 +312,10 @@ class Kuaiqianpay extends BusinessAbstract
         if ($verify === false) {
             return $this->getMsg(500, '返回的签名不正确');
         }
-        return $json;
+        if($json['responseCode'] != '00'){
+            return $this->getMsg(500,$json['responseMsg']);
+        }
+        return $json['data'];
     }
 
 
