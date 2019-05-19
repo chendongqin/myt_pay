@@ -214,7 +214,11 @@ class PayController extends \Base\ApiController
         //金额分单位转化为元
         $res['amt'] = bcdiv($res['amt'],100,2);
         $res['refundAmt'] = bcdiv($res['refundAmt'],100,2);
-        $res['equityInfo']['orderPayAmt'] = bcdiv($res['equityInfo']['orderPayAmt'],100,2);
+        if(!empty($res['equityInfo'])){
+            foreach ($res['equityInfo'] as $key=>$val){
+                $res['equityInfo'][$key] = bcdiv($val,100,2);
+            }
+        }
         //时间格式转化
         $res['txnTime'] = date('Y-m-d H:i:s',strtotime($res['txnTime']));
         unset($res['merchantId']);
