@@ -61,8 +61,20 @@ class Kqpay extends CronAbstract
                 $payData->txnTime = empty($payData->txnTime) ? $order->getCreate_at() : $payData->txnTime;
                 $polling = $requestTime - strtotime($payData->txnTime);
                 $order->setPolling($polling);
-                //轮询超时撤销
-                if ($order->getPolling() > 120) {
+                if($order->getPolling() >30 && $payBusiness->verifyScanC2BTypes($payData->payType)){
+                    $queryRes = $payBusiness->query($order);
+                    if($queryRes === false){
+                        $msg = $payBusiness->getMessage();
+                        $this->log($order->getOut_trade_no().':轮询查询失败,'.$msg['msg']);
+                    }
+                    //交易成功
+                    if($queryRes['txnFlag'] == 'S'){
+                        $order->setIs_done(2);
+                        $order->setStatus(2);
+                    }else{//继续轮询
+                        $order->setIs_done(0);
+                    }
+                }elseif ($order->getPolling() > 120) { //轮询超时撤销
                     $this->log($order->getOut_trade_no() . ':超时撤销');
                     //B2C do refund
                     if($payBusiness->verifyScanB2CTypes($payData->payType)){
@@ -77,18 +89,8 @@ class Kqpay extends CronAbstract
                         }
                     }else{//超时无效
                         //查询确认订单是否完成
-                        $queryRes = $payBusiness->query($order);
-                        if($queryRes === false){
-                            $msg = $payBusiness->getMessage();
-                            $this->log($order->getOut_trade_no().':轮询超时查询失败,'.$msg['msg']);
-                        }
-                        //交易成功
-                        if($queryRes['txnFlag'] == 'S'){
-                            $order->setStatus(2);
-                        }else{
-                            $order->setStatus(3);
-                            $order->setError('超时过期');
-                        }
+                        $order->setStatus(3);
+                        $order->setError('超时过期');
                         $order->setIs_done(2);
                     }
                 } else {
