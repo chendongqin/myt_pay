@@ -51,6 +51,7 @@ class PayController extends \Base\ApiController
         $payBusiness = \Business\Kuaiqianpay::getInstance();
         $orderMapper = \M\Mapper\MytTradeOrder::getInstance();
         $type = $orderMapper->getOrderType('商户扫码');
+        var_dump($type);die();
         $randomNum = 'v' . $type . \Ku\Tool::createOrderSn();
         $insertRes = $orderMapper->createKuaiqian($orderId, $merchantId, $goodsName, $type, $amount, $this->getDiver(), $randomNum);
         if ($insertRes === false) {
