@@ -72,6 +72,11 @@ class Kqpay extends CronAbstract
                         $order->setIs_done(2);
                         $order->setStatus(2);
                     }else{//继续轮询
+                        if($order->getPolling() > 120){
+                            $order->setStatus(3);
+                            $order->setError('超时过期');
+                            $order->setIs_done(2);
+                        }
                         $order->setIs_done(0);
                     }
                 }elseif ($order->getPolling() > 120) { //轮询超时撤销
