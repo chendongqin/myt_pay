@@ -62,18 +62,24 @@ class Kqpay extends CronAbstract
                 $polling = $requestTime - strtotime($payData->txnTime);
                 $order->setPolling($polling);
                 //轮询超时撤销
-                if ($order->getPolling() > 120 && $payBusiness->verifyScanB2CTypes($payData->payType)) {
+                if ($order->getPolling() > 120) {
                     $this->log($order->getOut_trade_no() . ':超时撤销');
-                    $res = $payBusiness->refund($order,'02');
-                    if($res === true){
+                    //B2C do refund
+                    if($payBusiness->verifyScanB2CTypes($payData->payType)){
+                        $res = $payBusiness->refund($order,'02');
+                        if($res === true){
+                            $order->setIs_done(2);
+                            $order->setStatus(4);
+                            $order->setError('轮询超时退款');
+                        }else{
+                            $msg = $payBusiness->getMessage();
+                            $this->log($order->getOut_trade_no().':轮询超时退款失败,'.$msg['msg']);
+                        }
+                    }else{//超时无效
+                        $order->setStatus(3);
+                        $order->setError('超时过期');
                         $order->setIs_done(2);
-                        $order->setStatus(4);
-                        $order->setError('轮询超时退款');
-                    }else{
-                        $msg = $payBusiness->getMessage();
-                        $this->log($order->getOut_trade_no().':轮询超时退款失败,'.$msg['msg']);
                     }
-                    //do refund
                 } else {
                     $order->setIs_done(0);
                 }
