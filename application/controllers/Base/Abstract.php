@@ -454,4 +454,14 @@ class AbstractController extends \Yaf\Controller_Abstract {
 
         return true;
     }
+
+    public function getApiDomain($conName) {
+        $apiIni = \Yaf\Registry::get('apiini');
+        if (!$apiIni) {
+            $apiIni = new \Yaf\Config\Ini(APPLICATION_PATH . '/conf/api.ini', \Yaf\Application::app()->environ());
+            \Yaf\Registry::set('apiini', $apiIni);
+        }
+        return $apiIni->get($conName);
+    }
+
 }

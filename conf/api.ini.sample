@@ -1,6 +1,6 @@
 [common]
 ;基本资源路径
-
+homeUrl = 'http://myt_pay.cddong.com';
 [product : common]
 
 [develop : product]

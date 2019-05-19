@@ -11,10 +11,7 @@ class PayController extends \Base\ApiController
 
     public function indexAction()
     {
-        $payCode = Ku\Consts::KUAIQIANPAY['scan_code'];
-        $orderId = $payCode . \Ku\Tool::createOrderSn();
-        $payBusiness = \Business\Kuaiqianpay::getInstance();
-//        $payBusiness->scan_code();
+
     }
 
 
@@ -93,6 +90,7 @@ class PayController extends \Base\ApiController
         $payType = $this->getParam('payType', '', 'string');
         $amount = $this->getParam('amount', 0, 'string');
         $goodsName = $this->getParam('goodsName', '', 'string');
+        $isShowQr = $this->getParam('isShowQr', 1, 'int');
         if (empty($goodsName)) {
             return $this->returnData('商品名称不能为空', 201);
         }
@@ -141,7 +139,14 @@ class PayController extends \Base\ApiController
         if ($updateRes === false) {
             return $this->returnData('更新订单信息失败', 209);
         }
-        return $this->returnData('成功', 200, true, ['orderId' => $orderId, 'authCode' => $res['data']['authCode']]);
+
+        if($isShowQr){
+            $homeUrl = $this->getApiDomain('homeUrl');
+            $url = $homeUrl.'/api/pay/qrcode?url='.$res['data']['authCode'];
+        }else{
+            $url = $res['data']['authCode'];
+        }
+        return $this->returnData('成功', 200, true, ['orderId' => $orderId, 'url' => $url]);
     }
 
     /**
@@ -207,33 +212,13 @@ class PayController extends \Base\ApiController
         return $this->returnData('成功',200,true,['detail'=>$orderDetail]);
     }
 
-    public function testAction()
+    public function qrcodeAction()
     {
-        $mapper = \M\Mapper\MytTradeOrder::getInstance();
-        $where = ['status'=>1, 'is_done' => 0, 'type' => 11];
-        $order = $mapper->fetch($where);
-        $payBusiness = \Business\Kuaiqianpay::getInstance();
-        if ($order instanceof \M\MytTradeOrder) {
-//            $order->setIs_done(1);
-            $res = $payBusiness->refund($order,'02');
-//            var_dump($res);die();
-            if (!$res) {
-                return $this->returnData($payBusiness->getMessage());
-            }
-            $status = $mapper->getKqTradeStatus($res['responseCode']);
-            $order->setStatus($status);
-            $order->setUpdate_at(date('YmdHis'));
-            if ($status == 3) {
-                $order->setError($res['responseMsg']);
-                $mapper->update($order);
-                return $this->returnData($res['responseMsg'], 202);
-            }
-            $updateRes = $mapper->update($order);
-            if ($updateRes === false) {
-                return $this->returnData('更新失败', 203);
-            }
-            return $this->returnData('更新成功', 200, true, ['orderId' => $order->getOut_trade_no()]);
-        }
+        $url = $this->getParam('url','','string');
+        $QRcode = new \Qrcode\QRcode();
+        $errorCorrectionLevel = 'H'; //容错级别
+        $matrixPointSize = 5; //生成图片大小
+        $QRcode::png($url, false, $errorCorrectionLevel, $matrixPointSize, 1);
     }
 
 }
