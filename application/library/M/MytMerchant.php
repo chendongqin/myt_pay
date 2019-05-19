@@ -35,7 +35,7 @@ class MytMerchant extends \M\ModelAbstract {
      * 
      * @var string
      */
-    protected $_merchat_name = '';
+    protected $_merchant_name = '';
 
     /**
      * 商户appId
@@ -158,12 +158,12 @@ class MytMerchant extends \M\ModelAbstract {
      * 
      * Column Type: varchar(255)
      * 
-     * @param string $merchat_name
+     * @param string $merchant_name
      * @return \M\Mytmerchant
      */
-    public function setMerchat_name($merchat_name) {
-        $this->_merchat_name = (string)$merchat_name;
-        $this->_params['merchat_name'] = (string)$merchat_name;
+    public function setMerchant_name($merchant_name) {
+        $this->_merchant_name = (string)$merchant_name;
+        $this->_params['merchant_name'] = (string)$merchant_name;
         return $this;
     }
 
@@ -174,8 +174,8 @@ class MytMerchant extends \M\ModelAbstract {
      * 
      * @return string
      */
-    public function getMerchat_name() {
-        return $this->_merchat_name;
+    public function getMerchant_name() {
+        return $this->_merchant_name;
     }
 
     /**
@@ -391,16 +391,16 @@ class MytMerchant extends \M\ModelAbstract {
      */
     public function toArray() {
         return array(
-            'id'           => $this->_id,
-            'merchat_name' => $this->_merchat_name,
-            'app_id'       => $this->_app_id,
-            'public_key'   => $this->_public_key,
-            'private_key'  => $this->_private_key,
-            'merchat_sn'   => $this->_merchat_sn,
-            'termianal_sn' => $this->_termianal_sn,
-            'create_at'    => $this->_create_at,
-            'update_at'    => $this->_update_at,
-            'is_del'       => $this->_is_del
+            'id'            => $this->_id,
+            'merchant_name' => $this->_merchant_name,
+            'app_id'        => $this->_app_id,
+            'public_key'    => $this->_public_key,
+            'private_key'   => $this->_private_key,
+            'merchat_sn'    => $this->_merchat_sn,
+            'termianal_sn'  => $this->_termianal_sn,
+            'create_at'     => $this->_create_at,
+            'update_at'     => $this->_update_at,
+            'is_del'        => $this->_is_del
         );
     }
 

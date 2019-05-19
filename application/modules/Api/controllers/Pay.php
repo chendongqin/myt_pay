@@ -209,6 +209,14 @@ class PayController extends \Base\ApiController
         $orderDetail['txnFlag'] = $mapper->getKqOrderTradeStatus($orderDetail['txnFlag']);
         //交易订单类型
         $orderDetail['txnType'] = $mapper->getKqOrderType($orderDetail['txnType']);
+        //金额分单位转化为元
+        $orderDetail['amt'] = bcdiv($orderDetail['amt'],100,2);
+        $orderDetail['refundAmt'] = bcdiv($orderDetail['refundAmt'],100,2);
+        $orderDetail['equityInfo']['orderPayAmt'] = bcdiv($orderDetail['equityInfo']['orderPayAmt'],100,2);
+        //时间格式转化
+        $orderDetail['txnTime'] = date('Y-m-d H:i:s',strtotime($orderDetail['txnTime']));
+        unset($orderDetail['merchantId']);
+        unset($orderDetail['terminalId']);
         return $this->returnData('成功',200,true,['detail'=>$orderDetail]);
     }
 
@@ -219,6 +227,51 @@ class PayController extends \Base\ApiController
         $errorCorrectionLevel = 'H'; //容错级别
         $matrixPointSize = 5; //生成图片大小
         $QRcode::png($url, false, $errorCorrectionLevel, $matrixPointSize, 1);
+    }
+
+    /**
+     * 获取商户信息
+     * @return false
+     * @throws Exception
+     */
+    public function get_merchantAction(){
+        $name = $this->getParam('name','','string');
+        $where = ['is_del'=>0];
+        if($name){
+            $where[] = "merchant_name like '".$name."%'";
+        }
+        $mapper =\M\Mapper\MytMerchant::getInstance();
+        $select = $mapper->select();
+        $select->where($where);
+        $select->order(['id'=>'DESC']);
+        $select->columns(['id','merchant_name']);
+        $page = $this->getParam('page', 1, 'int');
+        $pagelimit = $this->getParam('pagelimit', 15, 'int');
+        $pager = new \Ku\Page($select, $page, $pagelimit, $mapper->getAdapter());
+        return $this->returnData('成功',200,true,['page'=>$page,'pageLimit'=>$pagelimit,'lists'=>$pager->getList()]);
+    }
+
+    /**
+     * 获取商户扫码类型
+     * @return false
+     */
+    public function csan_b2c_typesAction(){
+        $payBusiness = \Business\Kuaiqianpay::getInstance();
+        $data = $payBusiness->getScanB2CTypes();
+        foreach ($data as $key=>$val){
+            $data[$key] = str_replace('(商户扫码)','',$val);
+        }
+        return $this->returnData('成功',200,true,$data);
+    }
+
+    /**
+     * 获取用户扫码类型
+     * @return false
+     */
+    public function csan_c2b_typesAction(){
+        $payBusiness = \Business\Kuaiqianpay::getInstance();
+        $data = $payBusiness->getScanC2BTypes();
+        return $this->returnData('成功',200,true,$data);
     }
 
 }

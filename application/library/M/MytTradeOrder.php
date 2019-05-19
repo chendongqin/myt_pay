@@ -147,7 +147,7 @@ class MytTradeOrder extends \M\ModelAbstract {
     /**
      * 随机校验码
      * 
-     * Column Type: varchar(20)
+     * Column Type: varchar(30)
      * 
      * @var string
      */
@@ -550,7 +550,7 @@ class MytTradeOrder extends \M\ModelAbstract {
     /**
      * 随机校验码
      * 
-     * Column Type: varchar(20)
+     * Column Type: varchar(30)
      * 
      * @param string $random_num
      * @return \M\Myttradeorder
@@ -564,7 +564,7 @@ class MytTradeOrder extends \M\ModelAbstract {
     /**
      * 随机校验码
      * 
-     * Column Type: varchar(20)
+     * Column Type: varchar(30)
      * 
      * @return string
      */
