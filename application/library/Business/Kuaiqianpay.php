@@ -192,7 +192,7 @@ class Kuaiqianpay extends BusinessAbstract
         $orderId = $payCode . \Ku\Tool::createOrderSn();
         $type = $mapper->getOrderType($typeStr);
         $randomNum = 'v' . $type . \Ku\Tool::createOrderSn();
-        $insertRes = $mapper->createKuaiqian($orderId, $merchant->getId(), $mytTradeOrder->getGoods_name(), $type, bcdiv($refundAmt,100,2), 'local', $randomNum ,$mytTradeOrder->getOut_trade_no());
+        $insertRes = $mapper->createKuaiqian($orderId, $merchant->getId(), $mytTradeOrder->getGoods_name(), $type, bcdiv($refundAmt,100,2), 'local', $randomNum ,$mytTradeOrder->getGoods_attribute(),$mytTradeOrder->getOut_trade_no());
         if($insertRes === false){
             return $this->getMsg(264,'添加退款订单失败');
         }
@@ -408,4 +408,10 @@ class Kuaiqianpay extends BusinessAbstract
         'CUPCSB'    => '银联扫码支付',
         'WECHATCSB' => '微信扫码支付',
     ];
+
+
+    public function qqs_query(\M\MytMerchant $merchant ,\M\MytTradeOrder $order){
+
+    }
+
 }

@@ -191,6 +191,15 @@ class MytTradeOrder extends \M\ModelAbstract {
     protected $_remark = '';
 
     /**
+     * 商品属性Json
+     * 
+     * Column Type: varchar(800)
+     * 
+     * @var string
+     */
+    protected $_goods_attribute = '';
+
+    /**
      * Params
      * 
      * Column Type: array
@@ -675,30 +684,56 @@ class MytTradeOrder extends \M\ModelAbstract {
     }
 
     /**
+     * 商品属性Json
+     * 
+     * Column Type: varchar(800)
+     * 
+     * @param string $goods_attribute
+     * @return \M\Myttradeorder
+     */
+    public function setGoods_attribute($goods_attribute) {
+        $this->_goods_attribute = (string)$goods_attribute;
+        $this->_params['goods_attribute'] = (string)$goods_attribute;
+        return $this;
+    }
+
+    /**
+     * 商品属性Json
+     * 
+     * Column Type: varchar(800)
+     * 
+     * @return string
+     */
+    public function getGoods_attribute() {
+        return $this->_goods_attribute;
+    }
+
+    /**
      * Return a array of model properties
      * 
      * @return array
      */
     public function toArray() {
         return array(
-            'id'            => $this->_id,
-            'goods_name'    => $this->_goods_name,
-            'out_trade_no'  => $this->_out_trade_no,
-            'into_trade_no' => $this->_into_trade_no,
-            'merchant_id'   => $this->_merchant_id,
-            'payment_type'  => $this->_payment_type,
-            'type'          => $this->_type,
-            'amount'        => $this->_amount,
-            'status'        => $this->_status,
-            'create_at'     => $this->_create_at,
-            'update_at'     => $this->_update_at,
-            'is_done'       => $this->_is_done,
-            'diver'         => $this->_diver,
-            'random_num'    => $this->_random_num,
-            'trade_info'    => $this->_trade_info,
-            'error'         => $this->_error,
-            'polling'       => $this->_polling,
-            'remark'        => $this->_remark
+            'id'              => $this->_id,
+            'goods_name'      => $this->_goods_name,
+            'out_trade_no'    => $this->_out_trade_no,
+            'into_trade_no'   => $this->_into_trade_no,
+            'merchant_id'     => $this->_merchant_id,
+            'payment_type'    => $this->_payment_type,
+            'type'            => $this->_type,
+            'amount'          => $this->_amount,
+            'status'          => $this->_status,
+            'create_at'       => $this->_create_at,
+            'update_at'       => $this->_update_at,
+            'is_done'         => $this->_is_done,
+            'diver'           => $this->_diver,
+            'random_num'      => $this->_random_num,
+            'trade_info'      => $this->_trade_info,
+            'error'           => $this->_error,
+            'polling'         => $this->_polling,
+            'remark'          => $this->_remark,
+            'goods_attribute' => $this->_goods_attribute
         );
     }
 

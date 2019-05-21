@@ -26,6 +26,21 @@ class PayController extends \Base\ApiController
         $amount = $this->getParam('amount', 0, 'string');
         $authCode = $this->getParam('authCode', '', 'string');
         $goodsName = $this->getParam('goodsName', '', 'string');
+        $goodsAttribute = $this->getParam('goodsAttribute', '', 'string');
+        //商品属性转化为数组和json
+        if($goodsAttribute){
+            $explodes = explode(',',$goodsAttribute);
+            $attributes = [];
+            foreach ($explodes as $explode){
+                $temp = implode(':',$explode);
+                if(isset($temp[1])){
+                    $attributes[$temp[0]] = $temp[1];
+                }else{
+                    $attributes[] = $temp[0];
+                }
+            }
+            $goodsAttribute = json_encode($attributes);
+        }
         if (empty($goodsName)) {
             return $this->returnData('商品名称不能为空', 201);
         }
@@ -49,7 +64,7 @@ class PayController extends \Base\ApiController
         $orderMapper = \M\Mapper\MytTradeOrder::getInstance();
         $type = $orderMapper->getOrderType('商户扫码');
         $randomNum = 'v' . $type . \Ku\Tool::createOrderSn();
-        $insertRes = $orderMapper->createKuaiqian($orderId, $merchantId, $goodsName, $type, $amount, $this->getDiver(), $randomNum);
+        $insertRes = $orderMapper->createKuaiqian($orderId, $merchantId, $goodsName, $type, $amount, $this->getDiver(), $randomNum,$goodsAttribute);
         if ($insertRes === false) {
             return $this->returnData('添加订单失败', 205);
         }
@@ -93,6 +108,21 @@ class PayController extends \Base\ApiController
         $isShowQr = $this->getParam('isShowQr', 1, 'int');
         $size = $this->getParam('size', 10, 'int');
         $margin = $this->getParam('margin', 3, 'int');
+        $goodsAttribute = $this->getParam('goodsAttribute', '', 'string');
+        //商品属性转化为数组和json
+        if($goodsAttribute){
+            $explodes = explode(',',$goodsAttribute);
+            $attributes = [];
+            foreach ($explodes as $explode){
+                $temp = implode(':',$explode);
+                if(isset($temp[1])){
+                    $attributes[$temp[0]] = $temp[1];
+                }else{
+                    $attributes[] = $temp[0];
+                }
+            }
+            $goodsAttribute = json_encode($attributes);
+        }
         if (empty($goodsName)) {
             return $this->returnData('商品名称不能为空', 201);
         }
@@ -117,7 +147,7 @@ class PayController extends \Base\ApiController
         }
         $type = $orderMapper->getOrderType('用户扫码');
         $randomNum = 'v' . $type . \Ku\Tool::createOrderSn();
-        $insertRes = $orderMapper->createKuaiqian($orderId, $merchantId, $goodsName, $type, $amount, $this->getDiver(), $randomNum);
+        $insertRes = $orderMapper->createKuaiqian($orderId, $merchantId, $goodsName, $type, $amount, $this->getDiver(), $randomNum,$goodsAttribute);
         if ($insertRes === false) {
             return $this->returnData('添加订单失败', 205);
         }
@@ -237,6 +267,9 @@ class PayController extends \Base\ApiController
         return $this->returnData('成功', 200, true, ['detail' => $res]);
     }
 
+    /**
+     * url转为二维码
+     */
     public function qrcodeAction()
     {
         $url = $this->getParam('url', '', 'string');
@@ -296,5 +329,22 @@ class PayController extends \Base\ApiController
         $data = $payBusiness->getScanC2BTypes();
         return $this->returnData('成功', 200, true, $data);
     }
+
+
+
+    public function qqs_queryAction(){
+        $orderSn = $this->getParam('orderSn', '', 'string');
+        $mapper = \M\Mapper\MytTradeOrder::getInstance();
+        $order = $mapper->findByOut_trade_no($orderSn);
+        if (!$order instanceof \M\MytTradeOrder) {
+            return $this->returnData('订单不存在', 201);
+        }
+        $merchant = \M\Mapper\MytMerchant::getInstance()->findById($order->getMerchant_id());
+        if(!$merchant instanceof \M\MytMerchant){
+            return $this->returnData('商户不存在', 202);
+        }
+        $payBusiness = \Business\Kuaiqianpay::getInstance();
+    }
+
 
 }

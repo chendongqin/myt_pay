@@ -35,7 +35,7 @@ class MytTradeOrder extends MapperAbstract
     }
 
 
-    public function createKuaiqian($orderId, $merchantId, $goodsName, $type, $amount, $diver = 'local', $randomNum = '', $intoTradeNo = '')
+    public function createKuaiqian($orderId, $merchantId, $goodsName, $type, $amount, $diver = 'local', $randomNum = '', $goodsAttribute, $intoTradeNo = '')
     {
         $model = new \M\MytTradeOrder();
         $model->setOut_trade_no($orderId);
@@ -48,6 +48,7 @@ class MytTradeOrder extends MapperAbstract
         $model->setInto_trade_no($intoTradeNo);
         $model->setCreate_at(date('YmdHis'));
         $model->setGoods_name($goodsName);
+        $model->setGoods_attribute($goodsAttribute);
         $res = $this->insert($model);
         if($res === false){
             return false;
