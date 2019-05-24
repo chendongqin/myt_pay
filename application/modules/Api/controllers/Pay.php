@@ -359,6 +359,7 @@ class PayController extends \Base\ApiController
         $color_black = new \BarcodeBakery\Common\BCGColor(0, 0, 0);
         $color_white = new \BarcodeBakery\Common\BCGColor(255, 255, 255);
 
+        $payData = json_decode($order->getTrade_info());
         $drawException = null;
         try {
             $code = new \BarcodeBakery\Barcode\BCGcode128();
@@ -367,7 +368,7 @@ class PayController extends \Base\ApiController
             $code->setForegroundColor($color_black); // 条形码颜色
             $code->setBackgroundColor($color_white); // 空白间隙颜色
             $code->setFont($font); //
-            $code->parse($order->getOut_trade_no()); // 条形码需要的数据内容
+            $code->parse($payData->idTxnCtrl); // 条形码需要的数据内容
         } catch(Exception $exception) {
             $drawException = $exception;
         }
