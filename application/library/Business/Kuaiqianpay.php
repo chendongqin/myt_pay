@@ -159,7 +159,7 @@ class Kuaiqianpay extends BusinessAbstract
      * @return bool|mixed
      * @throws \Exception
      */
-    public function refund(\M\MytTradeOrder $mytTradeOrder, $cancelType, $refundAmt = 0 ,$termOperId = 'admin')
+    public function refund(\M\MytTradeOrder $mytTradeOrder, $cancelType, $refundAmt = 0, $termOperId = 'admin')
     {
         $merchant = \M\Mapper\MytMerchant::getInstance()->findById($mytTradeOrder->getMerchant_id());
         if (!$merchant instanceof \M\MytMerchant) {
@@ -171,7 +171,7 @@ class Kuaiqianpay extends BusinessAbstract
                 return $this->getMsg(261, '超时撤销只针对商户扫码支付');
             } elseif (time() - strtotime($payData->txnTime) < 120) {
                 return $this->getMsg(262, '未达到撤销时间，不可超时撤销');
-            }elseif($mytTradeOrder->getStatus() != 1){
+            } elseif ($mytTradeOrder->getStatus() != 1) {
                 return $this->getMsg(265, '订单状态不属于处理中，不可超时撤销');
             }
             $refundAmt = $payData->amt;
@@ -179,22 +179,22 @@ class Kuaiqianpay extends BusinessAbstract
         } else {
             if (time() <= strtotime($payData->txnTime)) {
                 return $this->getMsg(263, '退货/正常退款需要隔天才能操作');
-            }elseif($mytTradeOrder->getStatus() != 2){
+            } elseif ($mytTradeOrder->getStatus() != 2) {
                 return $this->getMsg(265, '订单状态不成共，不可撤销/退货');
             }
-            $refundAmt = $refundAmt>0 ? $refundAmt : $payData->amt;
-            $typeStr = $cancelType == '01'?'正常撤销':'退货';
+            $refundAmt = $refundAmt > 0 ? $refundAmt : $payData->amt;
+            $typeStr = $cancelType == '01' ? '正常撤销' : '退货';
         }
         $pay = new \Ku\Pay\Kuaiqianpay\Payer($merchant->getPublic_key(), $merchant->getPrivate_key());
         $config = $pay->getConfig();
         $mapper = \M\Mapper\MytTradeOrder::getInstance();
-        $payCode = \Ku\Consts::KUAIQIANPAY['refund_'.$cancelType];
+        $payCode = \Ku\Consts::KUAIQIANPAY['refund_' . $cancelType];
         $orderId = $payCode . \Ku\Tool::createOrderSn();
         $type = $mapper->getOrderType($typeStr);
         $randomNum = 'v' . $type . \Ku\Tool::createOrderSn();
-        $insertRes = $mapper->createKuaiqian($orderId, $merchant->getId(), $mytTradeOrder->getGoods_name(), $type, bcdiv($refundAmt,100,2), 'local', $randomNum ,$mytTradeOrder->getGoods_attribute(),$mytTradeOrder->getOut_trade_no());
-        if($insertRes === false){
-            return $this->getMsg(264,'添加退款订单失败');
+        $insertRes = $mapper->createKuaiqian($orderId, $merchant->getId(), $mytTradeOrder->getGoods_name(), $type, bcdiv($refundAmt, 100, 2), 'local', 0, $randomNum, $mytTradeOrder->getGoods_attribute(), $mytTradeOrder->getOut_trade_no());
+        if ($insertRes === false) {
+            return $this->getMsg(264, '添加退款订单失败');
         }
         $pay->addParamData('orderId', $orderId);
         //货币类型：固定CNY
@@ -221,15 +221,15 @@ class Kuaiqianpay extends BusinessAbstract
         //退款订单处理
         $status = $mapper->getKqTradeStatus($json['responseCode']);
         $order = $mapper->findByOut_trade_no($orderId);
-        if(!$order instanceof \M\MytTradeOrder){
-            return $this->getMsg(266,'订单不存在');
+        if (!$order instanceof \M\MytTradeOrder) {
+            return $this->getMsg(266, '订单不存在');
         }
         $order->setStatus($status);
         $order->setUpdate_at(date('YmdHis'));
-        if($order->getStatus() == 3){
+        if ($order->getStatus() == 3) {
             $order->setError($json['responseMsg']);
             $mapper->update($order);
-            return $this->getMsg(267,$json['responseMsg']);
+            return $this->getMsg(267, $json['responseMsg']);
         }
         $order->setTrade_info(json_encode($json['data']));
         $mapper->update($order);
@@ -273,7 +273,8 @@ class Kuaiqianpay extends BusinessAbstract
      * @return bool|mixed
      * @throws \Exception
      */
-    public function query(\M\MytTradeOrder $mytTradeOrder){
+    public function query(\M\MytTradeOrder $mytTradeOrder)
+    {
         $merchant = \M\Mapper\MytMerchant::getInstance()->findById($mytTradeOrder->getMerchant_id());
         if (!$merchant instanceof \M\MytMerchant) {
             return $this->getMsg(260, '订单商户不存在');
@@ -282,22 +283,22 @@ class Kuaiqianpay extends BusinessAbstract
         $pay = new \Ku\Pay\Kuaiqianpay\Payer($merchant->getPublic_key(), $merchant->getPrivate_key());
         $config = $pay->getConfig();
         $orderType = 2;
-        if($mytTradeOrder->getType() >20){
+        if ($mytTradeOrder->getType() > 20) {
             //文档未备注其他订单的订单类型
 //            $orderType = 1;
         }
         $pay->addParamData('orderType', $orderType);
-        if(isset($payData->idTxn)){
+        if (isset($payData->idTxn)) {
             $pay->addParamData('idTxn', $payData->idTxn);
         }
-        if(isset($payData->termTraceNo)){
+        if (isset($payData->termTraceNo)) {
             $pay->addParamData('termTraceNo', $payData->termTraceNo);
         }
-        if(isset($payData->txnType)){
+        if (isset($payData->txnType)) {
             $pay->addParamData('txnType', $payData->txnType);
         }
         $pay->addParamData('orderId', $mytTradeOrder->getOut_trade_no());
-        if(isset($payData->idTxnCtrl)){
+        if (isset($payData->idTxnCtrl)) {
             $pay->addParamData('idTxnCtrl', $payData->idTxnCtrl);
         }
         $pay->addParamData('merchantId', $merchant->getMerchat_sn());
@@ -312,8 +313,8 @@ class Kuaiqianpay extends BusinessAbstract
         if ($verify === false) {
             return $this->getMsg(500, '返回的签名不正确');
         }
-        if($json['responseCode'] != '00'){
-            return $this->getMsg(500,$json['responseMsg']);
+        if ($json['responseCode'] != '00') {
+            return $this->getMsg(500, $json['responseMsg']);
         }
         return $json['data'];
     }
@@ -383,9 +384,10 @@ class Kuaiqianpay extends BusinessAbstract
         return false;
     }
 
-    public function getScanType($key){
-        $types = array_merge($this->_scanC2BType,$this->_scanB2CType);
-        if(!isset($types[$key])){
+    public function getScanType($key)
+    {
+        $types = array_merge($this->_scanC2BType, $this->_scanB2CType);
+        if (!isset($types[$key])) {
             return '';
         }
         return $types[$key];
@@ -409,9 +411,66 @@ class Kuaiqianpay extends BusinessAbstract
         'WECHATCSB' => '微信扫码支付',
     ];
 
+    /**
+     * 快钱支付mas回调处理
+     * @param $params
+     * @return bool
+     */
+    public function callback($params)
+    {
+        if (!isset($params['externalTraceNo'])) {
+            return $this->getMsg(201, '获取参数错误');
+        }
+        $mapper = \M\Mapper\MytTradeOrder::getInstance();
+        $order = $mapper->findByOut_order_no($params['externalTraceNo']);
+        if (!$order instanceof \M\MytTradeOrder) {
+            return $this->getMsg(202, '平台订单不存在');
+        }
+        $merchant = \M\Mapper\MytMerchant::getInstance()->findById($order->getMerchant_id());
+        if (!$merchant instanceof \M\MytMerchant) {
+            return $this->getMsg(203, '商户不存在');
+        }
+        $verifyRes = $this->verifyMasSign($params, APPLICATION_PATH . $merchant->getMas_public_key());
+        if($verifyRes === false){
+            return $this->getMsg(204,'签名错误');
+        }
+        //记录信息
+        $tradeInfo = json_encode($params);
+        $order->setTrade_info($tradeInfo);
+        if($params['processFlag'] == 0){
+            $order->setStatus(2);//处理成功
+        }elseif($params['processFlag'] == 1){
+            $order->setError($params['responseMsg']);
+            $order->setStatus(3);//处理失败
+        }
+        $mapper->update($order);
+        return true;
+    }
 
-    public function qqs_query(\M\MytMerchant $merchant ,\M\MytTradeOrder $order){
-
+    /**
+     * 回调验签
+     * @param $params
+     * @param $path
+     * @return bool
+     */
+    public function verifyMasSign($params, $path)
+    {
+        $signSort = [
+            'processFlag', 'txnType', 'orgTxnType', 'amt',
+            'externalTraceNo', 'orgExternalTraceNo', 'terminalOperId', 'authCode',
+            'RRN', 'txnTime', 'shortPAN', 'responseCode', 'cardType', 'issuerId'
+        ];
+        $signStr = '';
+        foreach ($signSort as $value) {
+            $signStr .= empty($params[$value]) ? '' : $params[$value];
+        }
+        $signature = $params['signature'];
+        $fp = fopen($path, 'r');
+        $cert = fread($fp, 8192);
+        fclose($fp);
+        $pubkeyid = openssl_get_publickey($cert);
+        $ok = (boolean)openssl_verify($signStr, $signature, $pubkeyid);
+        return $ok;
     }
 
 }

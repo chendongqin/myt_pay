@@ -6,3 +6,4 @@ key/*
 data/log/*
 data/logs/*
 Gorm.php
+data/KqKey/*

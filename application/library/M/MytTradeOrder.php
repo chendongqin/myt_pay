@@ -200,6 +200,16 @@ class MytTradeOrder extends \M\ModelAbstract {
     protected $_goods_attribute = '';
 
     /**
+     * 是否pos机提交
+     * 
+     * Column Type: tinyint(3)
+     * Default: 0
+     * 
+     * @var int
+     */
+    protected $_is_pos = 0;
+
+    /**
      * Params
      * 
      * Column Type: array
@@ -709,6 +719,33 @@ class MytTradeOrder extends \M\ModelAbstract {
     }
 
     /**
+     * 是否pos机提交
+     * 
+     * Column Type: tinyint(3)
+     * Default: 0
+     * 
+     * @param int $is_pos
+     * @return \M\Myttradeorder
+     */
+    public function setIs_pos($is_pos) {
+        $this->_is_pos = (int)$is_pos;
+        $this->_params['is_pos'] = (int)$is_pos;
+        return $this;
+    }
+
+    /**
+     * 是否pos机提交
+     * 
+     * Column Type: tinyint(3)
+     * Default: 0
+     * 
+     * @return int
+     */
+    public function getIs_pos() {
+        return $this->_is_pos;
+    }
+
+    /**
      * Return a array of model properties
      * 
      * @return array
@@ -733,7 +770,8 @@ class MytTradeOrder extends \M\ModelAbstract {
             'error'           => $this->_error,
             'polling'         => $this->_polling,
             'remark'          => $this->_remark,
-            'goods_attribute' => $this->_goods_attribute
+            'goods_attribute' => $this->_goods_attribute,
+            'is_pos'          => $this->_is_pos
         );
     }
 

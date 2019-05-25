@@ -113,6 +113,33 @@ class MytMerchant extends \M\ModelAbstract {
     protected $_is_del = 0;
 
     /**
+     * oqs私钥证书相对目录地址
+     * 
+     * Column Type: varchar(255)
+     * 
+     * @var string
+     */
+    protected $_oqs_private_key = '';
+
+    /**
+     * oqs公钥证书相对目录地址
+     * 
+     * Column Type: varchar(255)
+     * 
+     * @var string
+     */
+    protected $_oqs_public_key = '';
+
+    /**
+     * mas公钥证书相对目录地址
+     * 
+     * Column Type: varchar(255)
+     * 
+     * @var string
+     */
+    protected $_mas_public_key = '';
+
+    /**
      * Params
      * 
      * Column Type: array
@@ -385,22 +412,100 @@ class MytMerchant extends \M\ModelAbstract {
     }
 
     /**
+     * oqs私钥证书相对目录地址
+     * 
+     * Column Type: varchar(255)
+     * 
+     * @param string $oqs_private_key
+     * @return \M\Mytmerchant
+     */
+    public function setOqs_private_key($oqs_private_key) {
+        $this->_oqs_private_key = (string)$oqs_private_key;
+        $this->_params['oqs_private_key'] = (string)$oqs_private_key;
+        return $this;
+    }
+
+    /**
+     * oqs私钥证书相对目录地址
+     * 
+     * Column Type: varchar(255)
+     * 
+     * @return string
+     */
+    public function getOqs_private_key() {
+        return $this->_oqs_private_key;
+    }
+
+    /**
+     * oqs公钥证书相对目录地址
+     * 
+     * Column Type: varchar(255)
+     * 
+     * @param string $oqs_public_key
+     * @return \M\Mytmerchant
+     */
+    public function setOqs_public_key($oqs_public_key) {
+        $this->_oqs_public_key = (string)$oqs_public_key;
+        $this->_params['oqs_public_key'] = (string)$oqs_public_key;
+        return $this;
+    }
+
+    /**
+     * oqs公钥证书相对目录地址
+     * 
+     * Column Type: varchar(255)
+     * 
+     * @return string
+     */
+    public function getOqs_public_key() {
+        return $this->_oqs_public_key;
+    }
+
+    /**
+     * mas公钥证书相对目录地址
+     * 
+     * Column Type: varchar(255)
+     * 
+     * @param string $mas_public_key
+     * @return \M\Mytmerchant
+     */
+    public function setMas_public_key($mas_public_key) {
+        $this->_mas_public_key = (string)$mas_public_key;
+        $this->_params['mas_public_key'] = (string)$mas_public_key;
+        return $this;
+    }
+
+    /**
+     * mas公钥证书相对目录地址
+     * 
+     * Column Type: varchar(255)
+     * 
+     * @return string
+     */
+    public function getMas_public_key() {
+        return $this->_mas_public_key;
+    }
+
+    /**
      * Return a array of model properties
      * 
      * @return array
      */
     public function toArray() {
         return array(
-            'id'            => $this->_id,
-            'merchant_name' => $this->_merchant_name,
-            'app_id'        => $this->_app_id,
-            'public_key'    => $this->_public_key,
-            'private_key'   => $this->_private_key,
-            'merchat_sn'    => $this->_merchat_sn,
-            'termianal_sn'  => $this->_termianal_sn,
-            'create_at'     => $this->_create_at,
-            'update_at'     => $this->_update_at,
-            'is_del'        => $this->_is_del
+            'id'              => $this->_id,
+            'merchant_name'   => $this->_merchant_name,
+            'app_id'          => $this->_app_id,
+            'public_key'      => $this->_public_key,
+            'private_key'     => $this->_private_key,
+            'merchat_sn'      => $this->_merchat_sn,
+            'termianal_sn'    => $this->_termianal_sn,
+            'create_at'       => $this->_create_at,
+            'update_at'       => $this->_update_at,
+            'is_del'          => $this->_is_del,
+            'oqs_private_key' => $this->_oqs_private_key,
+            'oqs_public_key'  => $this->_oqs_public_key,
+            'mas_public_key'  => $this->_mas_public_key
         );
     }
 

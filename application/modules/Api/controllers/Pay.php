@@ -24,6 +24,7 @@ class PayController extends \Base\ApiController
         $merchantId = $this->getParam('merchantId', 0, 'int');
         $payType = $this->getParam('payType', '', 'string');
         $amount = $this->getParam('amount', 0, 'string');
+        $ispos = $this->getParam('ispos', 0, 'int');
         $authCode = $this->getParam('authCode', '', 'string');
         $goodsName = $this->getParam('goodsName', '', 'string');
         $goodsAttribute = $this->getParam('goodsAttribute', '', 'string');
@@ -64,7 +65,7 @@ class PayController extends \Base\ApiController
         $orderMapper = \M\Mapper\MytTradeOrder::getInstance();
         $type = $orderMapper->getOrderType('商户扫码');
         $randomNum = 'v' . $type . \Ku\Tool::createOrderSn();
-        $insertRes = $orderMapper->createKuaiqian($orderId, $merchantId, $goodsName, $type, $amount, $this->getDiver(), $randomNum,$goodsAttribute);
+        $insertRes = $orderMapper->createKuaiqian($orderId, $merchantId, $goodsName, $type, $amount, $this->getDiver(),$ispos, $randomNum,$goodsAttribute);
         if ($insertRes === false) {
             return $this->returnData('添加订单失败', 205);
         }
@@ -104,6 +105,7 @@ class PayController extends \Base\ApiController
         $merchantId = $this->getParam('merchantId', 0, 'int');
         $payType = $this->getParam('payType', '', 'string');
         $amount = $this->getParam('amount', 0, 'string');
+        $ispos = $this->getParam('ispos', 0, 'int');
         $goodsName = $this->getParam('goodsName', '', 'string');
         $isShowQr = $this->getParam('isShowQr', 1, 'int');
         $size = $this->getParam('size', 10, 'int');
@@ -147,7 +149,7 @@ class PayController extends \Base\ApiController
         }
         $type = $orderMapper->getOrderType('用户扫码');
         $randomNum = 'v' . $type . \Ku\Tool::createOrderSn();
-        $insertRes = $orderMapper->createKuaiqian($orderId, $merchantId, $goodsName, $type, $amount, $this->getDiver(), $randomNum,$goodsAttribute);
+        $insertRes = $orderMapper->createKuaiqian($orderId, $merchantId, $goodsName, $type, $amount, $this->getDiver(),$ispos, $randomNum,$goodsAttribute);
         if ($insertRes === false) {
             return $this->returnData('添加订单失败', 205);
         }
@@ -178,10 +180,6 @@ class PayController extends \Base\ApiController
             $html = '<img src="'.$homeUrl.'/api/pay/qrcode?url='.$url.'&size='.$size.'&margin='.$margin.'">
             <div><span style="font-size: 45px">请使用'.$c2bScan.'</span></div>';
             echo $html;
-//            $QRcode = new \Qrcode\QRcode();
-//            $errorCorrectionLevel = 'H'; //容错级别
-//            $matrixPointSize = $size; //生成图片大小
-//            $QRcode::png($url, false, $errorCorrectionLevel, $matrixPointSize, $margin);
             return false;
         }
         return $this->returnData('成功', 200, true, ['orderId' => $orderId, 'url' => $url]);
@@ -309,7 +307,7 @@ class PayController extends \Base\ApiController
      * 获取商户扫码类型
      * @return false
      */
-    public function csan_b2c_typesAction()
+    public function scan_b2c_typesAction()
     {
         $payBusiness = \Business\Kuaiqianpay::getInstance();
         $data = $payBusiness->getScanB2CTypes();
@@ -323,7 +321,7 @@ class PayController extends \Base\ApiController
      * 获取用户扫码类型
      * @return false
      */
-    public function csan_c2b_typesAction()
+    public function scan_c2b_typesAction()
     {
         $payBusiness = \Business\Kuaiqianpay::getInstance();
         $data = $payBusiness->getScanC2BTypes();
@@ -331,22 +329,27 @@ class PayController extends \Base\ApiController
     }
 
 
-
-    public function qqs_queryAction(){
-        $orderSn = $this->getParam('orderSn', '', 'string');
-        $mapper = \M\Mapper\MytTradeOrder::getInstance();
-        $order = $mapper->findByOut_trade_no($orderSn);
-        if (!$order instanceof \M\MytTradeOrder) {
-            return $this->returnData('订单不存在', 201);
-        }
-        $merchant = \M\Mapper\MytMerchant::getInstance()->findById($order->getMerchant_id());
-        if(!$merchant instanceof \M\MytMerchant){
-            return $this->returnData('商户不存在', 202);
-        }
-        $payBusiness = \Business\Kuaiqianpay::getInstance();
+    /**
+     * oqs请求
+     */
+    public function oqsAction(){
+        header("Content-type:text/xml");
+        $orderSn = $this->getParam('orderId','','string');
+        $reqTime = $this->getParam('reqTime','','string');
+        $ext1 = $this->getParam('ext1','','string');
+        $ext2 = $this->getParam('ext2','','string');
+        $MAC = $this->getParam('MAC','','string');
+        $payBusiness = \Business\Kuaiqianoqs::getInstance();
+        $str = $payBusiness->oqs($orderSn,$reqTime,$MAC,$ext1,$ext2);
+        echo $str;
     }
 
 
+    /**
+     * 订单转条形码
+     * @throws \BarcodeBakery\Common\BCGArgumentException
+     * @throws \BarcodeBakery\Common\BCGDrawException
+     */
     public function barcodeAction(){
         $orderSn = $this->getParam('orderSn','','string');
         $order = \M\Mapper\MytTradeOrder::getInstance()->findByOut_trade_no($orderSn);
@@ -358,8 +361,6 @@ class PayController extends \Base\ApiController
         //颜色条形码
         $color_black = new \BarcodeBakery\Common\BCGColor(0, 0, 0);
         $color_white = new \BarcodeBakery\Common\BCGColor(255, 255, 255);
-
-        $payData = json_decode($order->getTrade_info());
         $drawException = null;
         try {
             $code = new \BarcodeBakery\Barcode\BCGcode128();
@@ -368,9 +369,10 @@ class PayController extends \Base\ApiController
             $code->setForegroundColor($color_black); // 条形码颜色
             $code->setBackgroundColor($color_white); // 空白间隙颜色
             $code->setFont($font); //
-            $code->parse($payData->idTxnCtrl); // 条形码需要的数据内容
+            $code->parse($order->getOut_trade_no()); // 条形码需要的数据内容
         } catch(Exception $exception) {
             $drawException = $exception;
+
         }
 
         //根据以上条件绘制条形码

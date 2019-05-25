@@ -20,13 +20,14 @@ class MytTradeOrder extends MapperAbstract
      * 获取快钱待轮询处理的订单
      * @return \M\ModelAbstract|null
      */
-    public function pull(){
+    public function pull()
+    {
         //只有支付支持轮询|支付类型为11,12
 //        $where = ['status'=>1,'is_done'=>0 ,'type < 13','payment_type'=>'kuaiqianpay'];
-        $where = ['status'=>1,'is_done'=>0 ,'type < 13'];
-        $order = ['polling asc','id desc'];
-        $model = $this->fetch($where,$order);
-        if(!$model instanceof \M\MytTradeOrder){
+        $where = ['status' => 1, 'is_done' => 0, 'is_pos'=>0,'type < 13'];
+        $order = ['polling asc', 'id desc'];
+        $model = $this->fetch($where, $order);
+        if (!$model instanceof \M\MytTradeOrder) {
             return null;
         }
         $model->setIs_done(1);
@@ -35,7 +36,7 @@ class MytTradeOrder extends MapperAbstract
     }
 
 
-    public function createKuaiqian($orderId, $merchantId, $goodsName, $type, $amount, $diver = 'local', $randomNum = '', $goodsAttribute, $intoTradeNo = '')
+    public function createKuaiqian($orderId, $merchantId, $goodsName, $type, $amount, $diver = 'local', $ispos = 0, $randomNum = '', $goodsAttribute = '', $intoTradeNo = '')
     {
         $model = new \M\MytTradeOrder();
         $model->setOut_trade_no($orderId);
@@ -49,8 +50,9 @@ class MytTradeOrder extends MapperAbstract
         $model->setCreate_at(date('YmdHis'));
         $model->setGoods_name($goodsName);
         $model->setGoods_attribute($goodsAttribute);
+        $model->setIs_pos($ispos);
         $res = $this->insert($model);
-        if($res === false){
+        if ($res === false) {
             return false;
         }
         return true;
@@ -112,30 +114,30 @@ class MytTradeOrder extends MapperAbstract
     private $_orderTypes = [
         '商户扫码' => 11,
         '用户扫码' => 12,
-        '正常撤销'   => 21,
-        '超时撤销'   => 22,
+        '正常撤销' => 21,
+        '超时撤销' => 22,
         '退货'   => 23,
     ];
 
-    private  $_tradeStatus = [
-        'C0'=>1,
-        '68'=>1,
-        '00'=>2,
+    private $_tradeStatus = [
+        'C0' => 1,
+        '68' => 1,
+        '00' => 2,
     ];
 
     private $_orderTradeStatus = [
-        'S'	=>'成功',
-        'F'	=>'交易失败',
-        'P'	=>'交易处理中',
-        'V'	=>'交易撤销',
-        'R'	=>'交易冲正',
-        'D'	=>'已提交收单行(退货成功)',
+        'S' => '成功',
+        'F' => '交易失败',
+        'P' => '交易处理中',
+        'V' => '交易撤销',
+        'R' => '交易冲正',
+        'D' => '已提交收单行(退货成功)',
     ];
 
     private $_KqOrderTypes = [
-        '20200'=>'扫码支付',
-        '00500'=>'退货',
-        '20210'=>'扫码撤销',
+        '20200' => '扫码支付',
+        '00500' => '退货',
+        '20210' => '扫码撤销',
     ];
 
 }
